@@ -17,6 +17,19 @@ type gClient struct {
 	defParams url.Values
 }
 
+func getDefParams() map[string]string {
+	return map[string]string{
+		"tz":  "0",
+		"cat": "all",
+		"fi":  "0",
+		"fs":  "0",
+		"geo": "US",
+		"hl":  "EN",
+		"ri":  "10",
+		"rs":  "10",
+	}
+}
+
 func newGClient() *gClient {
 	p := url.Values{}
 	mParam := getDefParams()
@@ -29,8 +42,6 @@ func newGClient() *gClient {
 		defParams: p,
 	}
 }
-
-var client = newGClient()
 
 func (c *gClient) do(ctx context.Context, url *url.URL) (*http.Response, error) {
 	r := &http.Request{
@@ -45,19 +56,6 @@ func (c *gClient) do(ctx context.Context, url *url.URL) (*http.Response, error) 
 	}
 
 	return resp, nil
-}
-
-func getDefParams() map[string]string {
-	return map[string]string{
-		"tz":  "0",
-		"cat": "all",
-		"fi":  "0",
-		"fs":  "0",
-		"geo": "US",
-		"hl":  "EN",
-		"ri":  "10",
-		"rs":  "10",
-	}
 }
 
 func (c *gClient) trends(ctx context.Context, path, loc string) (*http.Response, error) {
@@ -78,6 +76,8 @@ func (c *gClient) trends(ctx context.Context, path, loc string) (*http.Response,
 
 	return resp, nil
 }
+
+var client = newGClient()
 
 // Daily gets daily trends for region specified by loc param
 func Daily(ctx context.Context, loc string) (*http.Response, error) {
