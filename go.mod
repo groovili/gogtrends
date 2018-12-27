@@ -1,4 +1,4 @@
-module github.com/groovili/go-gtrends
+module github.com/groovili/gogtrends
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
