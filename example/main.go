@@ -2,14 +2,18 @@ package main
 
 import (
 	"context"
-	"log"
-
 	"github.com/groovili/gogtrends"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	_, err := gogtrends.Daily(context.Background(), "US")
+	dailySearches, err := gogtrends.Daily(context.Background(), "US")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to get daily searches", err)
+	}
+
+	log.Println("Daily trending searches:")
+	for _, v := range dailySearches {
+		log.Info(v)
 	}
 }
