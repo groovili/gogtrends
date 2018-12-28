@@ -6,7 +6,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const locUS = "US"
+const (
+	locUS  = "US"
+	catAll = "all"
+)
 
 func main() {
 	ctx := context.Background()
@@ -22,7 +25,7 @@ func main() {
 	}
 
 	log.Println("Realtime trends:")
-	realtime, err := gogtrends.Realtime(ctx, locUS)
+	realtime, err := gogtrends.Realtime(ctx, locUS, catAll)
 	if err != nil {
 		log.Fatal("Failed to get realtime trends", err)
 	}

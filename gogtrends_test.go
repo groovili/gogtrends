@@ -9,7 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const locUS = "US"
+const (
+	locUS  = "US"
+	catAll = "all"
+)
 
 func TestRequest(t *testing.T) {
 	ctx := context.Background()
@@ -35,13 +38,22 @@ func TestRequest(t *testing.T) {
 }
 
 func TestDailyTrending(t *testing.T) {
+	locations := AvailableLocations()
+	_, ok := locations[locUS]
+	assert.True(t, ok)
+
 	resp, err := Daily(context.Background(), locUS)
 	assert.NoError(t, err)
 	assert.True(t, len(resp[0].Title.Query) > 0)
 }
 
 func TestRealtimeTrending(t *testing.T) {
-	resp, err := Realtime(context.Background(), locUS)
+	categories := RealtimeAvailableCategories()
+	assert.True(t, len(categories) > 0)
+	_, ok := categories[catAll]
+	assert.True(t, ok)
+
+	resp, err := Realtime(context.Background(), locUS, catAll)
 	assert.NoError(t, err)
 	assert.True(t, len(resp[0].Title) > 0)
 }
