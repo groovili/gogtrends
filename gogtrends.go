@@ -1,30 +1,14 @@
 package gogtrends
 
 import (
-	"bytes"
 	"context"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/json-iterator/go"
 	"github.com/pkg/errors"
-)
-
-const (
-	gAPI      = "https://trends.google.com/trends/api"
-	gDaily    = "/dailytrends"
-	gRealtime = "/realtimetrends"
-
-	paramCat = "cat"
-	paramGeo = "geo"
-
-	errParsing         = "failed to parse json"
-	errRequestFailed   = "failed to perform http request to API"
-	errReqDataF        = "request data: code = %d, status = %s, body = %s"
-	errInvalidCategory = "invalid category param"
-	errInvalidLocation = "invalid location param"
 )
 
 type gClient struct {
@@ -34,156 +18,17 @@ type gClient struct {
 	locations  map[string]string
 }
 
-type dailyOut struct {
-	Default *trendingSearchesDays `json:"default"`
-}
-
-type trendingSearchesDays struct {
-	Searches []*trendingSearchDays `json:"trendingSearchesDays"`
-}
-
-type trendingSearchDays struct {
-	FormattedDate string            `json:"formattedDate"`
-	Searches      []*TrendingSearch `json:"trendingSearches"`
-}
-
-type TrendingSearch struct {
-	Title            *SearchTitle     `json:"title"`
-	FormattedTraffic string           `json:"formattedTraffic"`
-	Image            *SearchImage     `json:"image"`
-	Articles         []*SearchArticle `json:"articles"`
-}
-
-type SearchTitle struct {
-	Query string `json:"query"`
-}
-
-type SearchImage struct {
-	NewsURL  string `json:"newsUrl"`
-	Source   string `json:"source"`
-	ImageURL string `json:"imageUrl"`
-}
-
-type SearchArticle struct {
-	Title   string       `json:"title"`
-	TimeAgo string       `json:"timeAgo"`
-	Source  string       `json:"source"`
-	Image   *SearchImage `json:"image"`
-	URL     string       `json:"url"`
-	Snippet string       `json:"snippet"`
-}
-
-type realtimeOut struct {
-	StorySummaries *storySummary `json:"storySummaries"`
-}
-
-type storySummary struct {
-	TrendingStories []*TrendingStory `json:"trendingStories"`
-}
-
-type TrendingStory struct {
-	Title    string             `json:"title"`
-	Image    *SearchImage       `json:"image"`
-	Articles []*TrendingArticle `json:"articles"`
-}
-
-type TrendingArticle struct {
-	Title   string `json:"articleTitle"`
-	URL     string `json:"url"`
-	Source  string `json:"source"`
-	Time    string `json:"time"`
-	Snippet string `json:"snippet"`
-}
-
-func getDefParams() map[string]string {
-	return map[string]string{
-		"tz":  "0",
-		"cat": "all",
-		"fi":  "0",
-		"fs":  "0",
-		"geo": "US",
-		"hl":  "EN",
-		"ri":  "10",
-		"rs":  "10",
-	}
-}
-
-func getAvailableLocations() map[string]string {
-	return map[string]string{
-		"AU": "Australia",
-		"AT": "Austria",
-		"AR": "Argentina",
-		"BE": "Belgium",
-		"BR": "Brazil",
-		"GB": "United Kingdom",
-		"HU": "Hungary",
-		"VN": "Vietnam",
-		"DE": "Germany",
-		"HK": "Hong Kong",
-		"GR": "Greece",
-		"DK": "Denmark",
-		"EG": "Egypt",
-		"IL": "Israel",
-		"IN": "India",
-		"IE": "Ireland",
-		"IT": "Italy",
-		"CA": "Canada",
-		"KE": "Kenia",
-		"CO": "Columbia",
-		"MY": "Malaysia",
-		"MX": "Mexico",
-		"NG": "Nigeria",
-		"NL": "Netherlands",
-		"NZ": "New Zeland",
-		"NO": "Norway",
-		"PL": "Poland",
-		"PT": "Portugal",
-		"KR": "Korean Republic",
-		"RU": "Russia",
-		"RO": "Romania",
-		"SA": "Saudi Arabia",
-		"SG": "Singapore",
-		"US": "United States",
-		"TH": "Thailand",
-		"TW": "Taiwan",
-		"TR": "Turkey",
-		"UA": "Ukraine",
-		"PH": "Philippines",
-		"FI": "Finland",
-		"FR": "France",
-		"CZ": "Czech Republic",
-		"CL": "Chili",
-		"CH": "Switzerland",
-		"SE": "Sweden",
-		"ZA": "Republic of South Africa",
-		"JP": "Japan",
-	}
-}
-
-func getAvailableCategories() map[string]string {
-	return map[string]string{
-		"all": "all",
-		"b":   "business",
-		"h":   "main news",
-		"m":   "health",
-		"t":   "science and technics",
-		"e":   "entertainment",
-		"s":   "sport",
-	}
-}
-
 func newGClient() *gClient {
-	p := url.Values{}
-	mParam := getDefParams()
-	for k, v := range mParam {
+	p := make(url.Values)
+	for k, v := range defaultParams {
 		p.Add(k, v)
 	}
 
 	return &gClient{
-		c:          new(http.Client),
+		c:          http.DefaultClient,
 		defParams:  p,
-		categories: getAvailableCategories(),
-		locations:  getAvailableLocations(),
+		categories: availableCategories,
+		locations:  availableLocations,
 	}
 }
 
@@ -192,7 +37,7 @@ func (c *gClient) do(ctx context.Context, url *url.URL) (*http.Response, error) 
 		URL:    url,
 		Method: http.MethodGet,
 	}
-	r.WithContext(ctx)
+	r = r.WithContext(ctx)
 
 	resp, err := c.c.Do(r)
 	if err != nil {
@@ -207,15 +52,12 @@ func (c *gClient) do(ctx context.Context, url *url.URL) (*http.Response, error) 
 }
 
 func (c *gClient) getRespData(resp *http.Response) (string, error) {
-	defer resp.Body.Close()
-
-	buf := new(bytes.Buffer)
-	_, err := io.Copy(buf, resp.Body)
+	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
-	return buf.String(), nil
+	return string(b), nil
 }
 
 func (c *gClient) trends(ctx context.Context, path, loc string, args ...map[string]string) (string, error) {
@@ -245,6 +87,7 @@ func (c *gClient) trends(ctx context.Context, path, loc string, args ...map[stri
 	}
 
 	data, err := c.getRespData(resp)
+	defer resp.Body.Close()
 	if err != nil {
 		return "", err
 	}
@@ -253,23 +96,15 @@ func (c *gClient) trends(ctx context.Context, path, loc string, args ...map[stri
 }
 
 func (c *gClient) validateCategory(cat string) bool {
-	for c := range client.categories {
-		if c == cat {
-			return true
-		}
-	}
+	_, ok := client.categories[cat]
 
-	return false
+	return ok
 }
 
 func (c *gClient) validateLocation(loc string) bool {
-	for l := range client.locations {
-		if loc == l {
-			return true
-		}
-	}
+	_, ok := client.locations[loc]
 
-	return false
+	return ok
 }
 
 var client = newGClient()
