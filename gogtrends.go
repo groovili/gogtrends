@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"github.com/json-iterator/go"
+	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -11,9 +12,12 @@ import (
 )
 
 const (
-	gAPI      = "https://trends.google.com/trends/api"
-	gDaily    = "/dailytrends"
-	gRealtime = "/realtimetrends"
+	gAPI             = "https://trends.google.com/trends/api"
+	gDaily           = "/dailytrends"
+	gRealtime        = "/realtimetrends"
+	errParsing       = "failed to parse json"
+	errRequestFailed = "failed to perform http request to API"
+	errReqDataF      = "request data: code = %d, status = %s, body = %s"
 )
 
 type gClient struct {
@@ -22,7 +26,7 @@ type gClient struct {
 }
 
 type dailyOut struct {
-	Default *trendingSearchesDays `json:"default"`
+	Default trendingSearchesDays `json:"default"`
 }
 
 type trendingSearchesDays struct {
@@ -58,6 +62,28 @@ type SearchArticle struct {
 	Image   SearchImage `json:"image"`
 	URL     string      `json:"url"`
 	Snippet string      `json:"snippet"`
+}
+
+type realtimeOut struct {
+	StorySummaries storySummary `json:"storySummaries"`
+}
+
+type storySummary struct {
+	TrendingStories []*TrendingStory `json:"trendingStories"`
+}
+
+type TrendingStory struct {
+	Title    string             `json:"title"`
+	Image    SearchImage        `json:"image"`
+	Articles []*TrendingArticle `json:"articles"`
+}
+
+type TrendingArticle struct {
+	Title   string `json:"articleTitle"`
+	URL     string `json:"url"`
+	Source  string `json:"source"`
+	Time    string `json:"time"`
+	Snippet string `json:"snippet"`
 }
 
 func getDefParams() map[string]string {
@@ -98,13 +124,29 @@ func (c *gClient) do(ctx context.Context, url *url.URL) (*http.Response, error) 
 		return nil, err
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.Wrapf(errors.New(errRequestFailed), errReqDataF, resp.StatusCode, resp.Status, resp.Body)
+	}
+
 	return resp, nil
 }
 
-func (c *gClient) trends(ctx context.Context, path, loc string) (*http.Response, error) {
+func (c *gClient) getRespData(resp *http.Response) (string, error) {
+	defer resp.Body.Close()
+
+	buf := new(bytes.Buffer)
+	_, err := io.Copy(buf, resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
+func (c *gClient) trends(ctx context.Context, path, loc string) (string, error) {
 	u, err := url.Parse(path)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	p := client.defParams
@@ -114,32 +156,32 @@ func (c *gClient) trends(ctx context.Context, path, loc string) (*http.Response,
 
 	resp, err := client.do(ctx, u)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return resp, nil
+	data, err := c.getRespData(resp)
+	if err != nil {
+		return "", err
+	}
+
+	return data, nil
 }
 
 var client = newGClient()
 
+// TODO: validation for location parameter
 // Daily gets daily trends for region specified by loc param
 func Daily(ctx context.Context, loc string) ([]*TrendingSearch, error) {
-	resp, err := client.trends(ctx, gAPI+gDaily, loc)
-	defer resp.Body.Close()
-
+	data, err := client.trends(ctx, gAPI+gDaily, loc)
 	if err != nil {
 		return nil, err
 	}
 
-	buf := new(bytes.Buffer)
-	io.Copy(buf, resp.Body)
-
 	out := new(dailyOut)
 	// google api returns not valid json :(
-	str := strings.Replace(buf.String(), ")]}',", "", 1)
-	err = jsoniter.UnmarshalFromString(str, out)
-	if err != nil {
-		return nil, err
+	str := strings.Replace(data, ")]}',", "", 1)
+	if err := jsoniter.UnmarshalFromString(str, out); err != nil {
+		return nil, errors.Wrap(err, errParsing)
 	}
 
 	searches := make([]*TrendingSearch, 0)
@@ -153,6 +195,23 @@ func Daily(ctx context.Context, loc string) ([]*TrendingSearch, error) {
 }
 
 // Realtime gets recent trends for region specified by loc param, available for limited list of regions
-func Realtime(ctx context.Context, loc string) (*http.Response, error) {
-	return client.trends(ctx, gAPI+gRealtime, loc)
+func Realtime(ctx context.Context, loc string) ([]*TrendingStory, error) {
+	data, err := client.trends(ctx, gAPI+gRealtime, loc)
+	if err != nil {
+		return nil, err
+	}
+
+	out := new(realtimeOut)
+	// google api returns not valid json :(
+	str := strings.Replace(data, ")]}'", "", 1)
+	if err := jsoniter.UnmarshalFromString(str, out); err != nil {
+		return nil, errors.Wrap(err, errParsing)
+	}
+
+	trends := make([]*TrendingStory, 0)
+	for _, v := range out.StorySummaries.TrendingStories {
+		trends = append(trends, v)
+	}
+
+	return trends, nil
 }
