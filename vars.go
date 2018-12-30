@@ -1,9 +1,17 @@
 package gogtrends
 
 const (
-	gAPI      = "https://trends.google.com/trends/api"
-	gDaily    = "/dailytrends"
-	gRealtime = "/realtimetrends"
+	gAPI = "https://trends.google.com/trends/api"
+
+	gDaily        = "/dailytrends"
+	gRealtime     = "/realtimetrends"
+
+	gSExplore     = "/explore"
+	gSCategories  = "/explore/pickers/category"
+	gSRelated     = "/widgetdata/relatedsearches"
+	gSSuggestions = "/autocomplete"
+	gSIntOverTime = "/widgetdata/multiline"
+	gSIntOverReg  = "/widgetdata/comparedgeo"
 
 	paramCat = "cat"
 	paramGeo = "geo"
@@ -23,8 +31,8 @@ var (
 		"fs":  "0",
 		"geo": "US",
 		"hl":  "EN",
-		"ri":  "10",
-		"rs":  "10",
+		"ri":  "300",
+		"rs":  "20",
 	}
 	availableLocations = map[string]string{
 		"AU": "Australia",
