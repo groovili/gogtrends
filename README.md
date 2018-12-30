@@ -2,7 +2,7 @@
 
 ###### Unofficial Google Trends API for Golang
 
-gogtrends is API wrapper which allows to get reports from Google Trends in JSON format.
+**gogtrends** is API wrapper which allows to get reports from Google Trends.
 
 All contributions, updates and issues are warmly welcome.
 
