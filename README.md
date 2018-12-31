@@ -18,13 +18,15 @@ Add `github.com/groovili/gogtrends` as import and run `go build` or manually req
 
 ### Available methods
 
-* `dailyT, err := gogtrends.Daily(ctx, "US")` - returns `TrendingSearch` structs descending ordered by days and articles corresponding to it.
+* `dT, err := gogtrends.Daily(ctx, "US")` - returns `TrendingSearch` structs descending ordered by days and articles corresponding to it.
 
-* `realtimeT, err := gogtrends.Realtime(ctx, "US", "all")` - returns `TrendingStory` structs, which represent realtime trends.
+* `rT, err := gogtrends.Realtime(ctx, "US", "all")` - returns `TrendingStory` structs, which represent realtime trends.
 
-* `categories := RealtimeAvailableCategories()` - list of available categories.
+* `c := TrendsCategories()` - list of available categories for Realtime trends.
 
-* `locations := AvailableLocations()` - list of available locations (geo).
+* `l := TrendsLocations()` - list of available locations (geo).
+
+* `c, err :=  gogtrends.ExploreCategories(ctx)` - tree of categories for explore and comparison. Called only once, then returned from client cache.
 
 ### Parameters 
 
