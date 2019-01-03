@@ -177,3 +177,14 @@ type ExploreCategoriesTree struct {
 	ID       int                      `json:"id"`
 	Children []*ExploreCategoriesTree `json:"children"`
 }
+
+type ExploreOut struct {
+	Widgets []*ExploreWidget `json:"widgets"`
+}
+
+type ExploreWidget struct {
+	Token string `json:"token"`
+	Type  string `json:"type"`
+	Title string `json:"title"`
+	ID    string `json:"id"`
+}

@@ -53,6 +53,8 @@ func main() {
 
 	log.Info("Explore trends:")
 
+	gogtrends.Debug(true)
+
 	explore, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
 		ComparisonItems: []*gogtrends.ComparisonItem{
 			{
@@ -68,7 +70,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Info(explore)
+	for _, v := range explore {
+		log.Info(v)
+	}
 }
 
 func printNestedItems(cats []*gogtrends.ExploreCategoriesTree) {

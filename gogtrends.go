@@ -2,14 +2,14 @@ package gogtrends
 
 import (
 	"context"
+	"github.com/json-iterator/go"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/json-iterator/go"
-	"github.com/pkg/errors"
 )
 
 type gClient struct {
@@ -19,6 +19,7 @@ type gClient struct {
 	locations   map[string]string
 	exploreCats *ExploreCategoriesTree
 	cookie      string
+	debug       bool
 }
 
 func newGClient() *gClient {
@@ -33,6 +34,7 @@ func newGClient() *gClient {
 		categories: availableCategories,
 		locations:  availableLocations,
 		cookie:     "",
+		debug:      false,
 	}
 }
 
@@ -51,9 +53,17 @@ func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
 		r.Header.Add("cookie", client.cookie)
 	}
 
+	if client.debug {
+		log.Info("[Debug] Request with params: ", r.URL)
+	}
+
 	resp, err := c.c.Do(r)
 	if err != nil {
 		return nil, err
+	}
+
+	if client.debug {
+		log.Info("[Debug] Response: ", resp)
 	}
 
 	if resp.StatusCode == http.StatusTooManyRequests {
@@ -134,6 +144,14 @@ func (c *gClient) validateLocation(loc string) bool {
 }
 
 var client = newGClient()
+
+func Debug(debug bool) {
+	client.debug = debug
+}
+
+func FormatTime(t time.Time) string {
+	return t.Format(timeLayoutFull)
+}
 
 // TrendsLocations returns general list of locations as map[param]name
 func TrendsLocations() map[string]string {
@@ -227,10 +245,10 @@ func ExploreCategories(ctx context.Context) (*ExploreCategoriesTree, error) {
 	return out, nil
 }
 
-func Explore(ctx context.Context, r *ExploreRequest, hl string) (string, error) {
+func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error) {
 	u, err := url.Parse(gAPI + gSExplore)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	p := make(url.Values)
@@ -239,7 +257,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) (string, error) 
 
 	mReq, err := jsoniter.MarshalToString(r)
 	if err != nil {
-		return "", errors.Wrapf(err, errInvalidRequest)
+		return nil, errors.Wrapf(err, errInvalidRequest)
 	}
 
 	p.Set(paramReq, mReq)
@@ -247,12 +265,15 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) (string, error) 
 
 	b, err := client.do(ctx, u)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(b), nil
-}
+	str := strings.Replace(string(b), ")]}'", "", 1)
 
-func FormatTime(t time.Time) string {
-	return t.Format(timeLayoutFull)
+	out := new(ExploreOut)
+	if err := jsoniter.UnmarshalFromString(str, out); err != nil {
+		return nil, errors.Wrap(err, errParsing)
+	}
+
+	return out.Widgets, nil
 }
