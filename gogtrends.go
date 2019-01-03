@@ -2,20 +2,24 @@ package gogtrends
 
 import (
 	"context"
+	"github.com/json-iterator/go"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/json-iterator/go"
-	"github.com/pkg/errors"
+	"time"
 )
 
 type gClient struct {
-	c          *http.Client
-	defParams  url.Values
-	categories map[string]string
-	locations  map[string]string
+	c           *http.Client
+	defParams   url.Values
+	categories  map[string]string
+	locations   map[string]string
+	exploreCats *ExploreCategoriesTree
+	cookie      string
+	debug       bool
 }
 
 func newGClient() *gClient {
@@ -29,46 +33,84 @@ func newGClient() *gClient {
 		defParams:  p,
 		categories: availableCategories,
 		locations:  availableLocations,
+		cookie:     "",
+		debug:      false,
 	}
 }
 
-func (c *gClient) do(ctx context.Context, url *url.URL) (*http.Response, error) {
+func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
+	p, _ := url.PathUnescape(u.String())
+	u, _ = u.Parse(p)
+
 	r := &http.Request{
-		URL:    url,
+		URL:    u,
 		Method: http.MethodGet,
 	}
 	r = r.WithContext(ctx)
+
+	r.Header = make(http.Header)
+	if client.cookie != "" {
+		r.Header.Add("cookie", client.cookie)
+	}
+
+	if client.debug {
+		log.Info("[Debug] Request with params: ", r.URL)
+	}
 
 	resp, err := c.c.Do(r)
 	if err != nil {
 		return nil, err
 	}
 
+	if client.debug {
+		log.Info("[Debug] Response: ", resp)
+	}
+
+	if resp.StatusCode == http.StatusTooManyRequests {
+		cookie := strings.Split(resp.Header.Get("set-cookie"), ";")
+		if len(cookie) > 0 {
+			client.cookie = cookie[0]
+			r.Header.Add("cookie", cookie[0])
+
+			resp, err = c.c.Do(r)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.Wrapf(errors.New(errRequestFailed), errReqDataF, resp.StatusCode, resp.Status, resp.Body)
 	}
 
-	return resp, nil
-}
-
-func (c *gClient) getRespData(resp *http.Response) (string, error) {
-	b, err := ioutil.ReadAll(resp.Body)
+	data, err := c.getRespData(resp)
+	defer resp.Body.Close()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(b), nil
+	return data, nil
 }
 
-func (c *gClient) trends(ctx context.Context, path, loc string, args ...map[string]string) (string, error) {
+func (c *gClient) getRespData(resp *http.Response) ([]byte, error) {
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}
+
+func (c *gClient) trends(ctx context.Context, path, hl, loc string, args ...map[string]string) (string, error) {
 	u, err := url.Parse(path)
 	if err != nil {
 		return "", err
 	}
 
-	// required param for all methods
+	// required params
 	p := client.defParams
 	p.Set(paramGeo, loc)
+	p.Set(paramHl, hl)
 
 	// additional params
 	if len(args) > 0 {
@@ -81,18 +123,12 @@ func (c *gClient) trends(ctx context.Context, path, loc string, args ...map[stri
 
 	u.RawQuery = p.Encode()
 
-	resp, err := client.do(ctx, u)
+	data, err := client.do(ctx, u)
 	if err != nil {
 		return "", err
 	}
 
-	data, err := c.getRespData(resp)
-	defer resp.Body.Close()
-	if err != nil {
-		return "", err
-	}
-
-	return data, nil
+	return string(data), nil
 }
 
 func (c *gClient) validateCategory(cat string) bool {
@@ -109,18 +145,26 @@ func (c *gClient) validateLocation(loc string) bool {
 
 var client = newGClient()
 
-// AvailableLocations returns general list of locations as map[param]name
-func AvailableLocations() map[string]string {
+func Debug(debug bool) {
+	client.debug = debug
+}
+
+func FormatTime(t time.Time) string {
+	return t.Format(timeLayoutFull)
+}
+
+// TrendsLocations returns general list of locations as map[param]name
+func TrendsLocations() map[string]string {
 	return client.locations
 }
 
-// Daily gets daily trends for region by location param
-func Daily(ctx context.Context, loc string) ([]*TrendingSearch, error) {
+// Daily gets daily trends for region for language and location param
+func Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error) {
 	if !client.validateLocation(loc) {
 		return nil, errors.New(errInvalidLocation)
 	}
 
-	data, err := client.trends(ctx, gAPI+gDaily, loc)
+	data, err := client.trends(ctx, gAPI+gDaily, hl, loc)
 	if err != nil {
 		return nil, err
 	}
@@ -142,13 +186,13 @@ func Daily(ctx context.Context, loc string) ([]*TrendingSearch, error) {
 	return searches, nil
 }
 
-// RealtimeAvailableCategories return list of available categories for Realtime method as [param]description map
-func RealtimeAvailableCategories() map[string]string {
+// TrendsCategories return list of available categories for Realtime method as [param]description map
+func TrendsCategories() map[string]string {
 	return client.categories
 }
 
-// Realtime gets current trends for location and category, available for limited list of locations
-func Realtime(ctx context.Context, loc, cat string) ([]*TrendingStory, error) {
+// Realtime gets current trends for language, location and category, available for limited list of locations
+func Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error) {
 	if !client.validateLocation(loc) {
 		return nil, errors.New(errInvalidLocation)
 	}
@@ -157,7 +201,7 @@ func Realtime(ctx context.Context, loc, cat string) ([]*TrendingStory, error) {
 		return nil, errors.New(errInvalidCategory)
 	}
 
-	data, err := client.trends(ctx, gAPI+gRealtime, loc, map[string]string{paramCat: cat})
+	data, err := client.trends(ctx, gAPI+gRealtime, hl, loc, map[string]string{paramCat: cat})
 	if err != nil {
 		return nil, err
 	}
@@ -175,4 +219,61 @@ func Realtime(ctx context.Context, loc, cat string) ([]*TrendingStory, error) {
 	}
 
 	return trends, nil
+}
+
+// ExploreCategories gets available categories for explore and comparison and caches it in client
+func ExploreCategories(ctx context.Context) (*ExploreCategoriesTree, error) {
+	if client.exploreCats != nil {
+		return client.exploreCats, nil
+	}
+
+	u, err := url.Parse(gAPI + gSCategories)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := client.do(ctx, u)
+	str := strings.Replace(string(b), ")]}'", "", 1)
+
+	out := new(ExploreCategoriesTree)
+	if err := jsoniter.UnmarshalFromString(str, out); err != nil {
+		return nil, errors.Wrap(err, errParsing)
+	}
+
+	client.exploreCats = out
+
+	return out, nil
+}
+
+func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error) {
+	u, err := url.Parse(gAPI + gSExplore)
+	if err != nil {
+		return nil, err
+	}
+
+	p := make(url.Values)
+	p.Set("tz", "0")
+	p.Set("hl", hl)
+
+	mReq, err := jsoniter.MarshalToString(r)
+	if err != nil {
+		return nil, errors.Wrapf(err, errInvalidRequest)
+	}
+
+	p.Set(paramReq, mReq)
+	u.RawQuery = p.Encode()
+
+	b, err := client.do(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+
+	str := strings.Replace(string(b), ")]}'", "", 1)
+
+	out := new(ExploreOut)
+	if err := jsoniter.UnmarshalFromString(str, out); err != nil {
+		return nil, errors.Wrap(err, errParsing)
+	}
+
+	return out.Widgets, nil
 }

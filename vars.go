@@ -3,8 +3,8 @@ package gogtrends
 const (
 	gAPI = "https://trends.google.com/trends/api"
 
-	gDaily        = "/dailytrends"
-	gRealtime     = "/realtimetrends"
+	gDaily    = "/dailytrends"
+	gRealtime = "/realtimetrends"
 
 	gSExplore     = "/explore"
 	gSCategories  = "/explore/pickers/category"
@@ -13,14 +13,19 @@ const (
 	gSIntOverTime = "/widgetdata/multiline"
 	gSIntOverReg  = "/widgetdata/comparedgeo"
 
+	paramHl  = "hl"
 	paramCat = "cat"
 	paramGeo = "geo"
+	paramReq = "req"
 
 	errParsing         = "failed to parse json"
 	errRequestFailed   = "failed to perform http request to API"
 	errReqDataF        = "request data: code = %d, status = %s, body = %s"
 	errInvalidCategory = "invalid category param"
 	errInvalidLocation = "invalid location param"
+	errInvalidRequest  = "invalid request param"
+
+	timeLayoutFull = "2006-01-02T15:04:05Z07:00" // https://golang.org/src/time/format.go
 )
 
 var (
@@ -153,4 +158,33 @@ type TrendingArticle struct {
 	Source  string `json:"source"`
 	Time    string `json:"time"`
 	Snippet string `json:"snippet"`
+}
+
+type ExploreRequest struct {
+	ComparisonItems []*ComparisonItem `json:"comparisonItem"`
+	Category        int               `json:"category"`
+	Property        string            `json:"property"`
+}
+
+type ComparisonItem struct {
+	Keyword string `json:"keyword"`
+	Geo     string `json:"geo"`
+	Time    string `json:"time"`
+}
+
+type ExploreCategoriesTree struct {
+	Name     string                   `json:"name"`
+	ID       int                      `json:"id"`
+	Children []*ExploreCategoriesTree `json:"children"`
+}
+
+type ExploreOut struct {
+	Widgets []*ExploreWidget `json:"widgets"`
+}
+
+type ExploreWidget struct {
+	Token string `json:"token"`
+	Type  string `json:"type"`
+	Title string `json:"title"`
+	ID    string `json:"id"`
 }
