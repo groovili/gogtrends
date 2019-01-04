@@ -158,7 +158,7 @@ func TrendsLocations() map[string]string {
 	return client.locations
 }
 
-// Daily gets daily trends for region for language and location param
+// Daily gets daily trends descending ordered by days and articles corresponding to it.
 func Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error) {
 	if !client.validateLocation(loc) {
 		return nil, errors.New(errInvalidLocation)
@@ -191,7 +191,7 @@ func TrendsCategories() map[string]string {
 	return client.categories
 }
 
-// Realtime gets current trends for language, location and category, available for limited list of locations
+// Realtime represents realtime trends with included articles and sources.
 func Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error) {
 	if !client.validateLocation(loc) {
 		return nil, errors.New(errInvalidLocation)
@@ -245,6 +245,9 @@ func ExploreCategories(ctx context.Context) (*ExploreCategoriesTree, error) {
 	return out, nil
 }
 
+// Explore list of widgets with tokens. Every widget
+// is related to specific method (`InterestOverTime`, `InterestOverLoc`, `RelatedSearches`, `Suggestions`)
+// and contains required token and request information.
 func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error) {
 	u, err := url.Parse(gAPI + gSExplore)
 	if err != nil {
@@ -278,6 +281,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 	return out.Widgets, nil
 }
 
+// InterestOverTime as list of `Timeline` dots for chart.
 func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Timeline, error) {
 	if w.ID != intOverTimeWidgetID {
 		return nil, errors.New(errInvalidWidgetType)

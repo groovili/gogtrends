@@ -18,15 +18,17 @@ Add `github.com/groovili/gogtrends` as import and run `go build` or manually req
 
 ### Available methods
 
-* `dT, err := gogtrends.Daily(ctx, "EN", "US")` - returns `TrendingSearch` structs descending ordered by days and articles corresponding to it.
+* `dT, err := gogtrends.Daily(ctx, hl, loc)` - `TrendingSearch` structs descending ordered by days and articles corresponding to it.
 
-* `rT, err := gogtrends.Realtime(ctx, "EN", "US", "all")` - returns `TrendingStory` structs, which represent realtime trends.
+* `rT, err := gogtrends.Realtime(ctx, hl, loc, cat)` - `TrendingStory` structs, represents realtime trends with included articles and sources.
 
-* `e, err := gogtrends.Explore(ctx, exploreReq, "EN")` - returns list of widgets with **tokens**, by request param.
+* `e, err := gogtrends.Explore(ctx, exploreReq, hl)` - list of widgets with **tokens**. Every widget is related to specific method (`InterestOverTime`, `InterestOverLoc`, `RelatedSearches`, `Suggestions`) and contains required **token** and request information.
 
-* `c := TrendsCategories()` - list of available categories for Realtime trends.
+* `iOT, err :=  gogtrends.InterestOverTime(ctx, widget, hl)` - interest over time, as list of `Timeline` dots for chart. 
 
-* `l := TrendsLocations()` - list of available locations (geo).
+* `c := gogtrends.TrendsCategories()` - available categories for Realtime trends.
+
+* `l := gogtrends.TrendsLocations()` - available locations (geo).
 
 * `c, err :=  gogtrends.ExploreCategories(ctx)` - tree of categories for explore and comparison. Called only once, then returned from client cache.
 
@@ -38,7 +40,9 @@ Add `github.com/groovili/gogtrends` as import and run `go build` or manually req
 
 * `cat` - string, lowercase category for real time trends, example "all" - all categories
 
-* `exploreReq` - `gogtrends.ExploreRequest` struct, witch represents search or comparison items.
+* `exploreReq` - `ExploreRequest` struct, represents search or comparison items.
+
+* `widget` - `ExploreWidget` struct, specific for every method, can be received by `Explore` method.
 
 ### Licence
  
