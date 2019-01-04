@@ -16,6 +16,8 @@ const (
 var sg = new(sync.WaitGroup)
 
 func main() {
+	gogtrends.Debug(true)
+
 	ctx := context.Background()
 
 	dailySearches, err := gogtrends.Daily(ctx, langEn, locUS)
@@ -53,8 +55,6 @@ func main() {
 
 	log.Info("Explore trends:")
 
-	gogtrends.Debug(true)
-
 	explore, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
 		ComparisonItems: []*gogtrends.ComparisonItem{
 			{
@@ -71,6 +71,17 @@ func main() {
 	}
 
 	for _, v := range explore {
+		log.Info(v)
+	}
+
+	log.Info("Interest over time:")
+
+	overTime, err := gogtrends.InterestOverTime(ctx, explore[0], langEn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, v := range overTime {
 		log.Info(v)
 	}
 }
