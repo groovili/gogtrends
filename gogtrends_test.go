@@ -79,3 +79,23 @@ func TestExplore(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
 }
+
+func TestInterestOverTime(t *testing.T) {
+	explore, err := Explore(context.Background(), &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Geo:     locUS,
+				Time:    "today+12-m",
+			},
+		},
+		Category: 31, // Programming category
+		Property: "",
+	}, langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(explore) == 4)
+
+	overTime, err := InterestOverTime(context.Background(), explore[0], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(overTime) > 0)
+}

@@ -1,5 +1,7 @@
 package gogtrends
 
+// TODO: export only needed structs, check validation and omitempty for every field
+
 const (
 	gAPI = "https://trends.google.com/trends/api"
 
@@ -13,31 +15,36 @@ const (
 	gSIntOverTime = "/widgetdata/multiline"
 	gSIntOverReg  = "/widgetdata/comparedgeo"
 
-	paramHl  = "hl"
-	paramCat = "cat"
-	paramGeo = "geo"
-	paramReq = "req"
+	paramHl    = "hl"
+	paramCat   = "cat"
+	paramGeo   = "geo"
+	paramReq   = "req"
+	paramTZ    = "tz"
+	paramToken = "token"
 
-	errParsing         = "failed to parse json"
-	errRequestFailed   = "failed to perform http request to API"
-	errReqDataF        = "request data: code = %d, status = %s, body = %s"
-	errInvalidCategory = "invalid category param"
-	errInvalidLocation = "invalid location param"
-	errInvalidRequest  = "invalid request param"
+	intOverTimeWidgetID = "TIMESERIES"
+
+	errParsing           = "failed to parse json"
+	errRequestFailed     = "failed to perform http request to API"
+	errReqDataF          = "request data: code = %d, status = %s, body = %s"
+	errInvalidCategory   = "invalid category param"
+	errInvalidLocation   = "invalid location param"
+	errInvalidRequest    = "invalid request param"
+	errInvalidWidgetType = "invalid widget type"
 
 	timeLayoutFull = "2006-01-02T15:04:05Z07:00" // https://golang.org/src/time/format.go
 )
 
 var (
 	defaultParams = map[string]string{
-		"tz":  "0",
-		"cat": "all",
-		"fi":  "0",
-		"fs":  "0",
-		"geo": "US",
-		"hl":  "EN",
-		"ri":  "300",
-		"rs":  "20",
+		paramTZ:  "0",
+		paramCat: "all",
+		"fi":     "0",
+		"fs":     "0",
+		paramGeo: "US",
+		paramHl:  "EN",
+		"ri":     "300",
+		"rs":     "20",
 	}
 	availableLocations = map[string]string{
 		"AU": "Australia",
@@ -183,8 +190,60 @@ type ExploreOut struct {
 }
 
 type ExploreWidget struct {
-	Token string `json:"token"`
+	Token   string          `json:"token"`
+	Type    string          `json:"type"`
+	Title   string          `json:"title"`
+	ID      string          `json:"id"`
+	Request *WidgetResponse `json:"request"`
+}
+
+type WidgetResponse struct {
+	Time        string                  `json:"time"`
+	Resolution  string                  `json:"resolution"`
+	Locale      string                  `json:"locale"`
+	RequestOpt  RequestOptions          `json:"requestOptions"`
+	CompItem    []*WidgetComparisonItem `json:"comparisonItem"`
+	KeywordType string                  `json:"keywordType"`
+	Metric      []string                `json:"metric"`
+	Restriction WidgetComparisonItem    `json:"restriction"`
+	Language    string                  `json:"language"`
+}
+
+type WidgetComparisonItem struct {
+	Geo                            map[string]string   `json:"geo,omitempty"`
+	Time                           string              `json:"time,omitempty"`
+	ComplexKeywordsRestriction     KeywordsRestriction `json:"complexKeywordsRestriction,omitempty"`
+	OriginalTimeRangeForExploreUrl string              `json:"originalTimeRangeForExploreUrl,omitempty"`
+}
+
+type KeywordsRestriction struct {
+	Keyword []*KeywordRestriction `json:"keyword"`
+}
+
+type KeywordRestriction struct {
 	Type  string `json:"type"`
-	Title string `json:"title"`
-	ID    string `json:"id"`
+	Value string `json:"value"`
+}
+
+type RequestOptions struct {
+	Property string `json:"property"`
+	Backend  string `json:"backend"`
+	Category int    `json:"category"`
+}
+
+type MultilineOut struct {
+	Default Multiline `json:"default"`
+}
+
+type Multiline struct {
+	TimelineData []*Timeline `json:"timelineData"`
+}
+
+type Timeline struct {
+	Time              string   `json:"time"`
+	FormattedTime     string   `json:"formattedTime"`
+	FormattedAxisTime string   `json:"formattedAxisTime"`
+	Value             []int    `json:"value"`
+	HasData           []bool   `json:"hasData"`
+	FormattedValue    []string `json:"formattedValue"`
 }

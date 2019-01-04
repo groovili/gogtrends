@@ -252,8 +252,8 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 	}
 
 	p := make(url.Values)
-	p.Set("tz", "0")
-	p.Set("hl", hl)
+	p.Set(paramTZ, "0")
+	p.Set(paramHl, hl)
 
 	mReq, err := jsoniter.MarshalToString(r)
 	if err != nil {
@@ -276,4 +276,41 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 	}
 
 	return out.Widgets, nil
+}
+
+func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Timeline, error) {
+	if w.ID != intOverTimeWidgetID {
+		return nil, errors.New(errInvalidWidgetType)
+	}
+
+	u, err := url.Parse(gAPI + gSIntOverTime)
+	if err != nil {
+		return nil, err
+	}
+
+	p := make(url.Values)
+	p.Set(paramTZ, "0")
+	p.Set(paramHl, hl)
+	p.Set(paramToken, w.Token)
+
+	mReq, err := jsoniter.MarshalToString(w.Request)
+	if err != nil {
+		return nil, errors.Wrapf(err, errInvalidRequest)
+	}
+
+	p.Set(paramReq, mReq)
+	u.RawQuery = p.Encode()
+
+	b, err := client.do(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+
+	str := strings.Replace(string(b), ")]}',", "", 1)
+	out := new(MultilineOut)
+	if err := jsoniter.UnmarshalFromString(str, out); err != nil {
+		return nil, errors.Wrap(err, errParsing)
+	}
+
+	return out.Default.TimelineData, nil
 }
