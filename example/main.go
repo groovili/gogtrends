@@ -84,9 +84,20 @@ func main() {
 	for _, v := range overTime {
 		log.Info(v)
 	}
+
+	log.Info("Interest over region:")
+
+	overReg, err := gogtrends.InterestByLocation(ctx, explore[1], langEn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, v := range overReg {
+		log.Info(v)
+	}
 }
 
-func printNestedItems(cats []*gogtrends.ExploreCategoriesTree) {
+func printNestedItems(cats []*gogtrends.ExploreCatTree) {
 	defer sg.Done()
 	for _, v := range cats {
 		log.Println(v.Name, v.ID)

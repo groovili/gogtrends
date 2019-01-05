@@ -64,6 +64,12 @@ func TestExploreCategories(t *testing.T) {
 	assert.True(t, len(exploreCats.Children) > 0)
 }
 
+func TestExploreLocations(t *testing.T) {
+	exploreLocs, err := ExploreLocations(context.Background())
+	assert.NoError(t, err)
+	assert.True(t, len(exploreLocs.Children) > 0)
+}
+
 func TestExplore(t *testing.T) {
 	explore, err := Explore(context.Background(), &ExploreRequest{
 		ComparisonItems: []*ComparisonItem{
@@ -96,6 +102,26 @@ func TestInterestOverTime(t *testing.T) {
 	assert.True(t, len(explore) == 4)
 
 	overTime, err := InterestOverTime(context.Background(), explore[0], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(overTime) > 0)
+}
+
+func TestInterestByLocation(t *testing.T) {
+	explore, err := Explore(context.Background(), &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Geo:     locUS,
+				Time:    "today+12-m",
+			},
+		},
+		Category: 31, // Programming category
+		Property: "",
+	}, langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(explore) == 4)
+
+	overTime, err := InterestByLocation(context.Background(), explore[1], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(overTime) > 0)
 }
