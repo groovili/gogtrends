@@ -22,7 +22,7 @@ Add `github.com/groovili/gogtrends` as import and run `go build` or manually req
 
 * `rT, err := gogtrends.Realtime(ctx, hl, loc, cat)` - `TrendingStory` structs, represents realtime trends with included articles and sources.
 
-* `e, err := gogtrends.Explore(ctx, exploreReq, hl)` - list of widgets with **tokens**. Every widget is related to specific method (`InterestOverTime`, `InterestOverLoc`, `RelatedSearches`, `Suggestions`) and contains required **token** and request information.
+* `e, err := gogtrends.Explore(ctx, exploreReq, hl)` - list of widgets with **tokens**. Every widget is related to specific method (`InterestOverTime`, `InterestByLocation`, `RelatedSearches`, `Suggestions`) and contains required **token** and request information.
 
 * `iOT, err :=  gogtrends.InterestOverTime(ctx, widget, hl)` - interest over time, as list of `Timeline` dots for chart. 
 
