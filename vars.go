@@ -10,6 +10,7 @@ const (
 
 	gSExplore     = "/explore"
 	gSCategories  = "/explore/pickers/category"
+	gSGeo         = "/explore/pickers/geo"
 	gSRelated     = "/widgetdata/relatedsearches"
 	gSSuggestions = "/autocomplete"
 	gSIntOverTime = "/widgetdata/multiline"
@@ -23,6 +24,7 @@ const (
 	paramToken = "token"
 
 	intOverTimeWidgetID = "TIMESERIES"
+	intOverRegionID     = "GEO_MAP"
 
 	errParsing           = "failed to parse json"
 	errRequestFailed     = "failed to perform http request to API"
@@ -179,10 +181,16 @@ type ComparisonItem struct {
 	Time    string `json:"time"`
 }
 
-type ExploreCategoriesTree struct {
-	Name     string                   `json:"name"`
-	ID       int                      `json:"id"`
-	Children []*ExploreCategoriesTree `json:"children"`
+type ExploreCatTree struct {
+	Name     string            `json:"name"`
+	ID       int               `json:"id"`
+	Children []*ExploreCatTree `json:"children"`
+}
+
+type ExploreLocTree struct {
+	Name     string            `json:"name"`
+	ID       string            `json:"id"`
+	Children []*ExploreLocTree `json:"children"`
 }
 
 type ExploreOut struct {
@@ -198,6 +206,7 @@ type ExploreWidget struct {
 }
 
 type WidgetResponse struct {
+	Geo         interface{}             `json:"geo,omitempty"`
 	Time        string                  `json:"time"`
 	Resolution  string                  `json:"resolution"`
 	Locale      string                  `json:"locale"`
@@ -246,4 +255,21 @@ type Timeline struct {
 	Value             []int    `json:"value"`
 	HasData           []bool   `json:"hasData"`
 	FormattedValue    []string `json:"formattedValue"`
+}
+
+type GeoOut struct {
+	Default Geo `json:"default"`
+}
+
+type Geo struct {
+	GeoMapData []*GeoMap `json:"geoMapData"`
+}
+
+type GeoMap struct {
+	GeoCode        string   `json:"geoCode"`
+	GeoName        string   `json:"geoName"`
+	Value          []int    `json:"value"`
+	FormattedValue []string `json:"formattedValue"`
+	MaxValueIndex  int      `json:"maxValueIndex"`
+	HasData        []bool   `json:"hasData"`
 }

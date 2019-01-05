@@ -26,11 +26,15 @@ Add `github.com/groovili/gogtrends` as import and run `go build` or manually req
 
 * `iOT, err :=  gogtrends.InterestOverTime(ctx, widget, hl)` - interest over time, as list of `Timeline` dots for chart. 
 
+* `iOL, err :=  gogtrends.InterestByLocation(ctx, widget, hl)` - interest by location, as list of `GeoMap`, with geo codes and interest values.
+
 * `c := gogtrends.TrendsCategories()` - available categories for Realtime trends.
 
 * `l := gogtrends.TrendsLocations()` - available locations (geo).
 
 * `c, err :=  gogtrends.ExploreCategories(ctx)` - tree of categories for explore and comparison. Called only once, then returned from client cache.
+
+* `l, err :=  gogtrends.ExploreLocations(ctx)` - tree of locations for explore and comparison. Called only once, then returned from client cache.
 
 ### Parameters 
 
