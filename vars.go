@@ -1,7 +1,5 @@
 package gogtrends
 
-// TODO: export only needed structs, check validation and omitempty for every field
-
 const (
 	gAPI = "https://trends.google.com/trends/api"
 
@@ -25,6 +23,8 @@ const (
 
 	intOverTimeWidgetID = "TIMESERIES"
 	intOverRegionID     = "GEO_MAP"
+	relatedQueriesID    = "RELATED_QUERIES"
+	relatedTopicsID     = "RELATED_TOPICS"
 
 	errParsing           = "failed to parse json"
 	errRequestFailed     = "failed to perform http request to API"
@@ -33,8 +33,6 @@ const (
 	errInvalidLocation   = "invalid location param"
 	errInvalidRequest    = "invalid request param"
 	errInvalidWidgetType = "invalid widget type"
-
-	timeLayoutFull = "2006-01-02T15:04:05Z07:00" // https://golang.org/src/time/format.go
 )
 
 var (
@@ -193,7 +191,7 @@ type ExploreLocTree struct {
 	Children []*ExploreLocTree `json:"children"`
 }
 
-type ExploreOut struct {
+type exploreOut struct {
 	Widgets []*ExploreWidget `json:"widgets"`
 }
 
@@ -206,16 +204,17 @@ type ExploreWidget struct {
 }
 
 type WidgetResponse struct {
-	Geo         interface{}             `json:"geo,omitempty"`
-	Time        string                  `json:"time"`
-	Resolution  string                  `json:"resolution"`
-	Locale      string                  `json:"locale"`
-	RequestOpt  RequestOptions          `json:"requestOptions"`
-	CompItem    []*WidgetComparisonItem `json:"comparisonItem"`
-	KeywordType string                  `json:"keywordType"`
-	Metric      []string                `json:"metric"`
-	Restriction WidgetComparisonItem    `json:"restriction"`
-	Language    string                  `json:"language"`
+	Geo                interface{}             `json:"geo,omitempty"`
+	Time               string                  `json:"time,omitempty"`
+	Resolution         string                  `json:"resolution,omitempty"`
+	Locale             string                  `json:"locale,omitempty"`
+	Restriction        WidgetComparisonItem    `json:"restriction"`
+	CompItem           []*WidgetComparisonItem `json:"comparisonItem"`
+	RequestOpt         RequestOptions          `json:"requestOptions"`
+	KeywordType        string                  `json:"keywordType"`
+	Metric             []string                `json:"metric"`
+	Language           string                  `json:"language"`
+	TrendinessSettings map[string]string       `json:"trendinessSettings"`
 }
 
 type WidgetComparisonItem struct {
@@ -240,11 +239,11 @@ type RequestOptions struct {
 	Category int    `json:"category"`
 }
 
-type MultilineOut struct {
-	Default Multiline `json:"default"`
+type multilineOut struct {
+	Default multiline `json:"default"`
 }
 
-type Multiline struct {
+type multiline struct {
 	TimelineData []*Timeline `json:"timelineData"`
 }
 
@@ -257,11 +256,11 @@ type Timeline struct {
 	FormattedValue    []string `json:"formattedValue"`
 }
 
-type GeoOut struct {
-	Default Geo `json:"default"`
+type geoOut struct {
+	Default geo `json:"default"`
 }
 
-type Geo struct {
+type geo struct {
 	GeoMapData []*GeoMap `json:"geoMapData"`
 }
 
@@ -272,4 +271,31 @@ type GeoMap struct {
 	FormattedValue []string `json:"formattedValue"`
 	MaxValueIndex  int      `json:"maxValueIndex"`
 	HasData        []bool   `json:"hasData"`
+}
+
+type relatedOut struct {
+	Default relatedList `json:"default"`
+}
+
+type relatedList struct {
+	Ranked []*rankedList `json:"rankedList"`
+}
+
+type rankedList struct {
+	Keywords []*RankedKeyword `json:"rankedKeyword"`
+}
+
+type RankedKeyword struct {
+	Query          string       `json:"query,omitempty"`
+	Topic          KeywordTopic `json:"topic,omitempty"`
+	Value          int          `json:"value"`
+	FormattedValue string       `json:"formattedValue"`
+	HasData        bool         `json:"hasData"`
+	Link           string       `json:"link"`
+}
+
+type KeywordTopic struct {
+	Mid   string `json:"mid"`
+	Title string `json:"title"`
+	Type  string `json:"type"`
 }

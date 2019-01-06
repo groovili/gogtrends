@@ -155,7 +155,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 
 	str := strings.Replace(string(b), ")]}'", "", 1)
 
-	out := new(ExploreOut)
+	out := new(exploreOut)
 	if err := client.unmarshal(str, out); err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 
 	str := strings.Replace(string(b), ")]}',", "", 1)
 
-	out := new(MultilineOut)
+	out := new(multilineOut)
 	if err := client.unmarshal(str, out); err != nil {
 		return nil, err
 	}
@@ -233,10 +233,54 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 
 	str := strings.Replace(string(b), ")]}',", "", 1)
 
-	out := new(GeoOut)
+	out := new(geoOut)
 	if err := client.unmarshal(str, out); err != nil {
 		return nil, err
 	}
 
 	return out.Default.GeoMapData, nil
+}
+
+func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword, error) {
+	if w.ID != relatedQueriesID && w.ID != relatedTopicsID {
+		return nil, errors.New(errInvalidWidgetType)
+	}
+
+	u, err := url.Parse(gAPI + gSRelated)
+	if err != nil {
+		return nil, err
+	}
+
+	p := make(url.Values)
+	p.Set(paramTZ, "0")
+	p.Set(paramHl, hl)
+	p.Set(paramToken, w.Token)
+
+	mReq, err := jsoniter.MarshalToString(w.Request)
+	if err != nil {
+		return nil, errors.Wrapf(err, errInvalidRequest)
+	}
+
+	p.Set(paramReq, mReq)
+	u.RawQuery = p.Encode()
+
+	b, err := client.do(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+
+	str := strings.Replace(string(b), ")]}',", "", 1)
+
+	out := new(relatedOut)
+	if err := client.unmarshal(str, out); err != nil {
+		return nil, err
+	}
+
+	keywords := make([]*RankedKeyword, 0)
+	for _, v := range out.Default.Ranked {
+		keywords = append(keywords, v.Keywords...)
+
+	}
+
+	return keywords, nil
 }

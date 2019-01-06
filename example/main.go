@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/groovili/gogtrends"
-	log "github.com/sirupsen/logrus"
+	"reflect"
 	"sync"
+
+	"github.com/groovili/gogtrends"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -16,36 +19,24 @@ const (
 var sg = new(sync.WaitGroup)
 
 func main() {
-	gogtrends.Debug(true)
+	//Enable debug to see request-response
+	//gogtrends.Debug(true)
 
 	ctx := context.Background()
 
-	dailySearches, err := gogtrends.Daily(ctx, langEn, locUS)
-	if err != nil {
-		log.Fatal("Failed to get daily searches", err)
-	}
-
 	log.Println("Daily trending searches:")
-	for _, v := range dailySearches {
-		log.Info(v)
-	}
+	dailySearches, err := gogtrends.Daily(ctx, langEn, locUS)
+	handleError(err, "Failed to get daily searches")
+	printItems(dailySearches)
 
 	log.Println("Realtime trends:")
 	realtime, err := gogtrends.Realtime(ctx, langEn, locUS, catAll)
-	if err != nil {
-		log.Fatal("Failed to get realtime trends", err)
-	}
-
-	for _, v := range realtime {
-		log.Info(v)
-	}
-
-	cats, err := gogtrends.ExploreCategories(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleError(err, "Failed to get realtime trends")
+	printItems(realtime)
 
 	log.Info("Available explore categories:")
+	cats, err := gogtrends.ExploreCategories(ctx)
+	handleError(err, "Failed to explore categories")
 	for _, v := range cats.Children {
 		log.Println(v.Name, v.ID)
 		sg.Add(1)
@@ -54,11 +45,10 @@ func main() {
 	sg.Wait()
 
 	log.Info("Explore trends:")
-
 	explore, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
 		ComparisonItems: []*gogtrends.ComparisonItem{
 			{
-				Keyword: "Golang",
+				Keyword: "Go",
 				Geo:     locUS,
 				Time:    "today+12-m",
 			},
@@ -66,34 +56,45 @@ func main() {
 		Category: 31, // Programming category
 		Property: "",
 	}, langEn)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, v := range explore {
-		log.Info(v)
-	}
+	handleError(err, "Failed to expore widgets")
+	printItems(explore)
 
 	log.Info("Interest over time:")
-
 	overTime, err := gogtrends.InterestOverTime(ctx, explore[0], langEn)
-	if err != nil {
-		log.Fatal(err)
-	}
+	handleError(err, "Failed in call interest over time")
+	printItems(overTime)
 
-	for _, v := range overTime {
-		log.Info(v)
-	}
-
-	log.Info("Interest over region:")
-
+	log.Info("Interest by location:")
 	overReg, err := gogtrends.InterestByLocation(ctx, explore[1], langEn)
+	handleError(err, "Failed in call interest by location")
+	printItems(overReg)
+
+	log.Info("Related topics:")
+	relT, err := gogtrends.Related(ctx, explore[2], langEn)
+	handleError(err, "Failed to get related topics")
+	printItems(relT)
+
+	log.Info("Related queries:")
+	relQ, err := gogtrends.Related(ctx, explore[3], langEn)
+	handleError(err, "Failed to get related queries")
+	printItems(relQ)
+}
+
+func handleError(err error, errMsg string) {
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(errors.Wrap(err, errMsg))
+	}
+}
+
+func printItems(items interface{}) {
+	ref := reflect.ValueOf(items)
+
+	if ref.Kind() != reflect.Slice {
+		log.Fatalf("Failed to print %s. It's not a slice type.", ref.Kind())
 	}
 
-	for _, v := range overReg {
-		log.Info(v)
+	for i := 0; i < ref.Len(); i++ {
+		log.Println(ref.Index(i).Interface())
 	}
 }
 

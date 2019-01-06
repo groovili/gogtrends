@@ -2,7 +2,6 @@ package gogtrends
 
 import (
 	"context"
-	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,27 +13,16 @@ const (
 	langEN = "EN"
 )
 
-func TestRequests(t *testing.T) {
-	ctx := context.Background()
-
-	u, err := url.Parse(gAPI + gDaily)
-	assert.NoError(t, err)
-
-	p := client.defParams
-	p.Set("geo", locUS)
-	u.RawQuery = p.Encode()
-
-	data, err := client.do(ctx, u)
-	assert.NoError(t, err)
-	assert.True(t, len(data) > 0)
-
-	u, err = url.Parse(gAPI + gRealtime)
-	assert.NoError(t, err)
-	u.RawQuery = p.Encode()
-
-	data, err = client.do(ctx, u)
-	assert.NoError(t, err)
-	assert.True(t, len(data) > 0)
+var exploreReq = &ExploreRequest{
+	ComparisonItems: []*ComparisonItem{
+		{
+			Keyword: "Golang",
+			Geo:     locUS,
+			Time:    "today+12-m",
+		},
+	},
+	Category: 31, // Programming category
+	Property: "",
 }
 
 func TestDailyTrending(t *testing.T) {
@@ -71,33 +59,13 @@ func TestExploreLocations(t *testing.T) {
 }
 
 func TestExplore(t *testing.T) {
-	explore, err := Explore(context.Background(), &ExploreRequest{
-		ComparisonItems: []*ComparisonItem{
-			{
-				Keyword: "Golang",
-				Geo:     locUS,
-				Time:    "today+12-m",
-			},
-		},
-		Category: 31, // Programming category
-		Property: "",
-	}, langEN)
+	explore, err := Explore(context.Background(), exploreReq, langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
 }
 
 func TestInterestOverTime(t *testing.T) {
-	explore, err := Explore(context.Background(), &ExploreRequest{
-		ComparisonItems: []*ComparisonItem{
-			{
-				Keyword: "Golang",
-				Geo:     locUS,
-				Time:    "today+12-m",
-			},
-		},
-		Category: 31, // Programming category
-		Property: "",
-	}, langEN)
+	explore, err := Explore(context.Background(), exploreReq, langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
 
@@ -107,21 +75,25 @@ func TestInterestOverTime(t *testing.T) {
 }
 
 func TestInterestByLocation(t *testing.T) {
-	explore, err := Explore(context.Background(), &ExploreRequest{
-		ComparisonItems: []*ComparisonItem{
-			{
-				Keyword: "Golang",
-				Geo:     locUS,
-				Time:    "today+12-m",
-			},
-		},
-		Category: 31, // Programming category
-		Property: "",
-	}, langEN)
+	explore, err := Explore(context.Background(), exploreReq, langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
 
 	overTime, err := InterestByLocation(context.Background(), explore[1], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(overTime) > 0)
+}
+
+func TestRelated(t *testing.T) {
+	explore, err := Explore(context.Background(), exploreReq, langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(explore) == 4)
+
+	relatedTopics, err := Related(context.Background(), explore[2], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(relatedTopics) > 0)
+
+	relatedQueries, err := Related(context.Background(), explore[3], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(relatedQueries) > 0)
 }
