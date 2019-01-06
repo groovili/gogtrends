@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO: add tests for items comparison
 const (
 	locUS  = "US"
 	catAll = "all"
@@ -26,10 +27,6 @@ var exploreReq = &ExploreRequest{
 }
 
 func TestDailyTrending(t *testing.T) {
-	locations := TrendsLocations()
-	_, ok := locations[locUS]
-	assert.True(t, ok)
-
 	resp, err := Daily(context.Background(), langEN, locUS)
 	assert.NoError(t, err)
 	assert.True(t, len(resp[0].Title.Query) > 0)

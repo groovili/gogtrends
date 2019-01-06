@@ -2,11 +2,12 @@ package gogtrends
 
 import (
 	"context"
-	"github.com/json-iterator/go"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -15,8 +16,7 @@ import (
 type gClient struct {
 	c           *http.Client
 	defParams   url.Values
-	categories  map[string]string
-	locations   map[string]string
+	trendsCats  map[string]string
 	exploreCats *ExploreCatTree
 	exploreLocs *ExploreLocTree
 	cookie      string
@@ -24,6 +24,7 @@ type gClient struct {
 }
 
 func newGClient() *gClient {
+	// default request params
 	p := make(url.Values)
 	for k, v := range defaultParams {
 		p.Add(k, v)
@@ -32,8 +33,7 @@ func newGClient() *gClient {
 	return &gClient{
 		c:          http.DefaultClient,
 		defParams:  p,
-		categories: availableCategories,
-		locations:  availableLocations,
+		trendsCats: trendsCategories,
 		cookie:     "",
 		debug:      false,
 	}
@@ -143,13 +143,7 @@ func (c *gClient) trends(ctx context.Context, path, hl, loc string, args ...map[
 }
 
 func (c *gClient) validateCategory(cat string) bool {
-	_, ok := client.categories[cat]
-
-	return ok
-}
-
-func (c *gClient) validateLocation(loc string) bool {
-	_, ok := client.locations[loc]
+	_, ok := client.trendsCats[cat]
 
 	return ok
 }

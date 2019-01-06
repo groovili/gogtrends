@@ -2,34 +2,27 @@ package gogtrends
 
 import (
 	"context"
-	"github.com/json-iterator/go"
-	"github.com/pkg/errors"
 	"net/url"
 	"strings"
+
+	jsoniter "github.com/json-iterator/go"
+	"github.com/pkg/errors"
 )
 
 var client = newGClient()
 
+// Debug allows to see request-response details.
 func Debug(debug bool) {
 	client.debug = debug
 }
 
-// TrendsLocations returns general list of locations as map[param]name
-func TrendsLocations() map[string]string {
-	return client.locations
-}
-
-// TrendsCategories return list of available categories for Realtime method as [param]description map
+// TrendsCategories return list of available categories for Realtime method as [param]description map.
 func TrendsCategories() map[string]string {
-	return client.categories
+	return client.trendsCats
 }
 
 // Daily gets daily trends descending ordered by days and articles corresponding to it.
 func Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error) {
-	if !client.validateLocation(loc) {
-		return nil, errors.New(errInvalidLocation)
-	}
-
 	data, err := client.trends(ctx, gAPI+gDaily, hl, loc)
 	if err != nil {
 		return nil, err
@@ -43,6 +36,7 @@ func Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error) {
 		return nil, err
 	}
 
+	// split searches by days together
 	searches := make([]*TrendingSearch, 0)
 	for _, v := range out.Default.Searches {
 		for _, k := range v.Searches {
@@ -55,10 +49,6 @@ func Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error) {
 
 // Realtime represents realtime trends with included articles and sources.
 func Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error) {
-	if !client.validateLocation(loc) {
-		return nil, errors.New(errInvalidLocation)
-	}
-
 	if !client.validateCategory(cat) {
 		return nil, errors.New(errInvalidCategory)
 	}
@@ -79,7 +69,7 @@ func Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error
 	return out.StorySummaries.TrendingStories, nil
 }
 
-// ExploreCategories gets available categories for explore and comparison and caches it in client
+// ExploreCategories gets available categories for explore and comparison and caches it in client.
 func ExploreCategories(ctx context.Context) (*ExploreCatTree, error) {
 	if client.exploreCats != nil {
 		return client.exploreCats, nil
@@ -91,6 +81,8 @@ func ExploreCategories(ctx context.Context) (*ExploreCatTree, error) {
 	}
 
 	b, err := client.do(ctx, u)
+
+	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}'", "", 1)
 
 	out := new(ExploreCatTree)
@@ -98,12 +90,13 @@ func ExploreCategories(ctx context.Context) (*ExploreCatTree, error) {
 		return nil, err
 	}
 
+	// cache in client
 	client.exploreCats = out
 
 	return out, nil
 }
 
-// ExploreLocations gets available locations for explore and comparison and caches it in client
+// ExploreLocations gets available locations for explore and comparison and caches it in client.
 func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 	if client.exploreLocs != nil {
 		return client.exploreLocs, nil
@@ -115,6 +108,8 @@ func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 	}
 
 	b, err := client.do(ctx, u)
+
+	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}'", "", 1)
 
 	out := new(ExploreLocTree)
@@ -122,6 +117,7 @@ func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 		return nil, err
 	}
 
+	// cache in client
 	client.exploreLocs = out
 
 	return out, nil
@@ -140,6 +136,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 	p.Set(paramTZ, "0")
 	p.Set(paramHl, hl)
 
+	// marshal request for query param
 	mReq, err := jsoniter.MarshalToString(r)
 	if err != nil {
 		return nil, errors.Wrapf(err, errInvalidRequest)
@@ -153,6 +150,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 		return nil, err
 	}
 
+	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}'", "", 1)
 
 	out := new(exploreOut)
@@ -179,6 +177,7 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 	p.Set(paramHl, hl)
 	p.Set(paramToken, w.Token)
 
+	// marshal request for query param
 	mReq, err := jsoniter.MarshalToString(w.Request)
 	if err != nil {
 		return nil, errors.Wrapf(err, errInvalidRequest)
@@ -192,6 +191,7 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 		return nil, err
 	}
 
+	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}',", "", 1)
 
 	out := new(multilineOut)
@@ -218,6 +218,7 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 	p.Set(paramHl, hl)
 	p.Set(paramToken, w.Token)
 
+	// marshal request for query param
 	mReq, err := jsoniter.MarshalToString(w.Request)
 	if err != nil {
 		return nil, errors.Wrapf(err, errInvalidRequest)
@@ -231,6 +232,7 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 		return nil, err
 	}
 
+	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}',", "", 1)
 
 	out := new(geoOut)
@@ -241,6 +243,7 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 	return out.Default.GeoMapData, nil
 }
 
+// Related topics or queries, list of `RankedKeyword`, supports two types of widgets.
 func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword, error) {
 	if w.ID != relatedQueriesID && w.ID != relatedTopicsID {
 		return nil, errors.New(errInvalidWidgetType)
@@ -256,6 +259,7 @@ func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword
 	p.Set(paramHl, hl)
 	p.Set(paramToken, w.Token)
 
+	// marshal request for query param
 	mReq, err := jsoniter.MarshalToString(w.Request)
 	if err != nil {
 		return nil, errors.Wrapf(err, errInvalidRequest)
@@ -269,6 +273,7 @@ func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword
 		return nil, err
 	}
 
+	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}',", "", 1)
 
 	out := new(relatedOut)
@@ -276,6 +281,7 @@ func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword
 		return nil, err
 	}
 
+	// split all keywords together
 	keywords := make([]*RankedKeyword, 0)
 	for _, v := range out.Default.Ranked {
 		keywords = append(keywords, v.Keywords...)

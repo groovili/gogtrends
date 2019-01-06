@@ -14,29 +14,50 @@ Go modules support is required to use this package, also all dependencies can be
 export GO111MODULE=on
 ```
 
-Add `github.com/groovili/gogtrends` as import and run `go build` or manually require in go.mod file.
+Add `github.com/groovili/gogtrends` as import and run `go build` or manually require in `go.mod` file.
+
+#### Debug
+
+To see request-response details use `gogtrends.Debug(true)`
+
+#### Usage
+
+**Daily** and **Realtime** trends used as it is. For both methods user interface language are required. For **Realtime** trends category is required param, list of available categories -  **TrendsCategories**.
+
+Please notice that **Realtime** trends are available only for limited list of locations.
+
+
+For **InterestOverTime**, **InterestByLocation** and **Related** - widget and user interface language are required.
+
+To get widget you should call **Explore** methods first, it will return constant list of available widgets, every widget corresponds to methods above.
+
+Widget includes request params and unique token for every method.
+
+Also **Explore** method supports single and multiple items for comparision. Please take a look at **ExploreRequest** input.
+It supports search by multiple categories and locations which you can get as tree structure by **ExploreCategories** and **ExploreLocations**.
+
 
 ### Available methods
 
-* `dT, err := gogtrends.Daily(ctx, hl, loc)` - `TrendingSearch` structs descending ordered by days and articles corresponding to it.
+* `Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error)` - daily trends descending ordered by days and articles corresponding to it.
 
-* `rT, err := gogtrends.Realtime(ctx, hl, loc, cat)` - `TrendingStory` structs, represents realtime trends with included articles and sources.
+* `Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error)` - represents realtime trends with included articles and sources.
 
-* `e, err := gogtrends.Explore(ctx, exploreReq, hl)` - list of widgets with **tokens**. Every widget is related to specific method (`InterestOverTime`, `InterestByLocation`, `RelatedSearches`, `Suggestions`) and contains required **token** and request information.
+* `Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error)` - widgets with **tokens**. Every widget is related to specific method (`InterestOverTime`, `InterestByLocation`, `Related`) and contains required **token** and request information.
 
-* `iOT, err :=  gogtrends.InterestOverTime(ctx, widget, hl)` - interest over time, as list of `Timeline` dots for chart. 
+* `InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Timeline, error)` - interest over time, dots for chart. 
 
-* `iOL, err :=  gogtrends.InterestByLocation(ctx, widget, hl)` - interest by location, as list of `GeoMap`, with geo codes and interest values.
+* `InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*GeoMap, error)` - interest by location, list for map with geo codes and interest values.
 
-* `c := gogtrends.TrendsCategories()` - available categories for Realtime trends.
+* `Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword, error)` - related topics or queries, supports two types of widgets.
 
-* `l := gogtrends.TrendsLocations()` - available locations (geo).
+* `TrendsCategories() map[string]string` - available categories for `Realtime` trends.
 
-* `c, err :=  gogtrends.ExploreCategories(ctx)` - tree of categories for explore and comparison. Called only once, then returned from client cache.
+* `ExploreCategories(ctx context.Context) (*ExploreCatTree, error)` - tree of categories for explore and comparison. Called once, then returned from cache.
 
-* `l, err :=  gogtrends.ExploreLocations(ctx)` - tree of locations for explore and comparison. Called only once, then returned from client cache.
+* `ExploreLocations(ctx context.Context) (*ExploreLocTree, error)` - tree of locations for explore and comparison. Called once, then returned from cache.
 
-### Parameters 
+#### Parameters 
 
 * `hl` -  string, user interface language
 
@@ -47,6 +68,51 @@ Add `github.com/groovili/gogtrends` as import and run `go build` or manually req
 * `exploreReq` - `ExploreRequest` struct, represents search or comparison items.
 
 * `widget` - `ExploreWidget` struct, specific for every method, can be received by `Explore` method.
+
+### Examples
+
+Working detailed examples for all methods and cases can be found in ***example*** folder. Short version below.
+
+```go
+// Daily trends
+ctx := context.Background()
+dailySearches, err := gogtrends.Daily(ctx, "EN", "US")
+```
+
+```go
+// Get available trends categories and realtime trends
+cats := gogtrends.TrendsCategories()
+realtime, err := gogtrends.Realtime(ctx, "EN", "US", "all")
+```
+
+
+```go
+// Explore available widgets for keywords and get all available stats for it
+explore, err := gogtrends.Explore(ctx, 
+	    &gogtrends.ExploreRequest{
+            ComparisonItems: []*gogtrends.ComparisonItem{
+                {
+                    Keyword: "Go",
+                    Geo:     "US",
+                    Time:    "today+12-m",
+                },
+            },
+            Category: 31, // Programming category
+            Property: "",
+        }, "EN")
+
+// Interest over time
+overTime, err := gogtrends.InterestOverTime(ctx, explore[0], "EN")
+
+// Interest by location
+byLoc, err := gogtrends.InterestByLocation(ctx, explore[1], "EN")
+
+// Related topics for keyword
+relT, err := gogtrends.Related(ctx, explore[2], "EN")
+
+// Related queries for keyword
+relQ, err := gogtrends.Related(ctx, explore[3], "EN")
+```
 
 ### Licence
  

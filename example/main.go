@@ -37,6 +37,9 @@ func main() {
 	log.Info("Available explore categories:")
 	cats, err := gogtrends.ExploreCategories(ctx)
 	handleError(err, "Failed to explore categories")
+
+	// recursive print of categories tree
+	// do it concurrent to increase execution speed
 	for _, v := range cats.Children {
 		log.Println(v.Name, v.ID)
 		sg.Add(1)
@@ -45,6 +48,7 @@ func main() {
 	sg.Wait()
 
 	log.Info("Explore trends:")
+	// get widgets for Golang keyword in programming category
 	explore, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
 		ComparisonItems: []*gogtrends.ComparisonItem{
 			{
@@ -56,7 +60,7 @@ func main() {
 		Category: 31, // Programming category
 		Property: "",
 	}, langEn)
-	handleError(err, "Failed to expore widgets")
+	handleError(err, "Failed to explore widgets")
 	printItems(explore)
 
 	log.Info("Interest over time:")

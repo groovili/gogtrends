@@ -30,7 +30,6 @@ const (
 	errRequestFailed     = "failed to perform http request to API"
 	errReqDataF          = "request data: code = %d, status = %s, body = %s"
 	errInvalidCategory   = "invalid category param"
-	errInvalidLocation   = "invalid location param"
 	errInvalidRequest    = "invalid request param"
 	errInvalidWidgetType = "invalid widget type"
 )
@@ -46,56 +45,7 @@ var (
 		"ri":     "300",
 		"rs":     "20",
 	}
-	availableLocations = map[string]string{
-		"AU": "Australia",
-		"AT": "Austria",
-		"AR": "Argentina",
-		"BE": "Belgium",
-		"BR": "Brazil",
-		"GB": "United Kingdom",
-		"HU": "Hungary",
-		"VN": "Vietnam",
-		"DE": "Germany",
-		"HK": "Hong Kong",
-		"GR": "Greece",
-		"DK": "Denmark",
-		"EG": "Egypt",
-		"IL": "Israel",
-		"IN": "India",
-		"IE": "Ireland",
-		"IT": "Italy",
-		"CA": "Canada",
-		"KE": "Kenia",
-		"CO": "Columbia",
-		"MY": "Malaysia",
-		"MX": "Mexico",
-		"NG": "Nigeria",
-		"NL": "Netherlands",
-		"NZ": "New Zeland",
-		"NO": "Norway",
-		"PL": "Poland",
-		"PT": "Portugal",
-		"KR": "Korean Republic",
-		"RU": "Russia",
-		"RO": "Romania",
-		"SA": "Saudi Arabia",
-		"SG": "Singapore",
-		"US": "United States",
-		"TH": "Thailand",
-		"TW": "Taiwan",
-		"TR": "Turkey",
-		"UA": "Ukraine",
-		"PH": "Philippines",
-		"FI": "Finland",
-		"FR": "France",
-		"CZ": "Czech Republic",
-		"CL": "Chili",
-		"CH": "Switzerland",
-		"SE": "Sweden",
-		"ZA": "Republic of South Africa",
-		"JP": "Japan",
-	}
-	availableCategories = map[string]string{
+	trendsCategories = map[string]string{
 		"all": "all",
 		"b":   "business",
 		"h":   "main news",
