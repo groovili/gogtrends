@@ -26,6 +26,8 @@ const (
 	relatedQueriesID    = "RELATED_QUERIES"
 	relatedTopicsID     = "RELATED_TOPICS"
 
+	compareDataMode = "PERCENTAGES"
+
 	errParsing           = "failed to parse json"
 	errRequestFailed     = "failed to perform http request to API"
 	errReqDataF          = "request data: code = %d, status = %s, body = %s"
@@ -165,6 +167,7 @@ type WidgetResponse struct {
 	Metric             []string                `json:"metric"`
 	Language           string                  `json:"language"`
 	TrendinessSettings map[string]string       `json:"trendinessSettings"`
+	DataMode           string                  `json:"dataMode,omitempty"`
 }
 
 type WidgetComparisonItem struct {

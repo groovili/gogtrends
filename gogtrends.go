@@ -218,6 +218,10 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 	p.Set(paramHl, hl)
 	p.Set(paramToken, w.Token)
 
+	if len(w.Request.CompItem) > 1 {
+		w.Request.DataMode = compareDataMode
+	}
+
 	// marshal request for query param
 	mReq, err := jsoniter.MarshalToString(w.Request)
 	if err != nil {

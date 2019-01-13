@@ -36,6 +36,7 @@ Widget includes request params and unique token for every method.
 Also **Explore** method supports single and multiple items for comparision. Please take a look at **ExploreRequest** input.
 It supports search by multiple categories and locations which you can get as tree structure by **ExploreCategories** and **ExploreLocations**.
 
+Please notice, when you call **Explore** method for keywords comparison, two first widgets would be for all of compared items, next widgets would be for each of individual items.
 
 ### Available methods
 
@@ -112,6 +113,31 @@ relT, err := gogtrends.Related(ctx, explore[2], "EN")
 
 // Related queries for keyword
 relQ, err := gogtrends.Related(ctx, explore[3], "EN")
+
+// Compare keywords interest
+compare, err := gogtrends.Explore(ctx, 
+	    &gogtrends.ExploreRequest{
+            ComparisonItems: []*gogtrends.ComparisonItem{
+                {
+                    Keyword: "Go",
+                    Geo:     "US",
+                    Time:    "today+12-m",
+                },
+                {
+                    Keyword: "Python",
+                    Geo:     "US",
+                    Time:    "today+12-m",
+                },
+                {
+                    Keyword: "PHP",
+                    Geo:     "US",
+                    Time:    "today+12-m",
+                },                               
+            },
+            Category: 31, // Programming category
+            Property: "",
+        }, "EN")
+
 ```
 
 ### Licence

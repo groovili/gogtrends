@@ -82,6 +82,32 @@ func main() {
 	relQ, err := gogtrends.Related(ctx, explore[3], langEn)
 	handleError(err, "Failed to get related queries")
 	printItems(relQ)
+
+	log.Info("Compare keywords:")
+	// compare few keywords popularity
+	comapre, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
+		ComparisonItems: []*gogtrends.ComparisonItem{
+			{
+				Keyword: "Go",
+				Geo:     locUS,
+				Time:    "today+12-m",
+			},
+			{
+				Keyword: "Python",
+				Geo:     locUS,
+				Time:    "today+12-m",
+			},
+			{
+				Keyword: "PHP",
+				Geo:     locUS,
+				Time:    "today+12-m",
+			},
+		},
+		Category: 31, // Programming category
+		Property: "",
+	}, langEn)
+	handleError(err, "Failed to explore compare widgets")
+	printItems(comapre)
 }
 
 func handleError(err error, errMsg string) {
