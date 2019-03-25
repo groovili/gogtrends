@@ -171,7 +171,7 @@ type WidgetResponse struct {
 }
 
 type WidgetComparisonItem struct {
-	Geo                            map[string]string   `json:"geo,omitempty"`
+	Geo                            map[string]string   `json:"geo"`
 	Time                           string              `json:"time,omitempty"`
 	ComplexKeywordsRestriction     KeywordsRestriction `json:"complexKeywordsRestriction,omitempty"`
 	OriginalTimeRangeForExploreUrl string              `json:"originalTimeRangeForExploreUrl,omitempty"`
