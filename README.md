@@ -2,7 +2,7 @@
 
 ###### Unofficial Google Trends API for Golang
 
-[![Go Report Card](https://goreportcard.com/report/github.com/groovili/gogtrends)](https://goreportcard.com/report/github.com/groovili/gogtrends)
+[![Go Report Card](https://goreportcard.com/badge/github.com/groovili/gogtrends)](https://goreportcard.com/report/github.com/groovili/gogtrends)
 
 [![License](https://img.shields.io/badge/licence-MIT-blue.svg)](https://github.com/groovili/gogtrends/blob/master/LICENSE)
 
