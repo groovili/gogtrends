@@ -59,196 +59,196 @@ var (
 )
 
 type dailyOut struct {
-	Default *trendingSearchesDays `json:"default"`
+	Default *trendingSearchesDays `json:"default" bson:"default"`
 }
 
 type trendingSearchesDays struct {
-	Searches []*trendingSearchDays `json:"trendingSearchesDays"`
+	Searches []*trendingSearchDays `json:"trendingSearchesDays" bson:"trending_search_days"`
 }
 
 type trendingSearchDays struct {
-	FormattedDate string            `json:"formattedDate"`
-	Searches      []*TrendingSearch `json:"trendingSearches"`
+	FormattedDate string            `json:"formattedDate" bson:"formatted_date"`
+	Searches      []*TrendingSearch `json:"trendingSearches" bson:"searches"`
 }
 
 type TrendingSearch struct {
-	Title            *SearchTitle     `json:"title"`
-	FormattedTraffic string           `json:"formattedTraffic"`
-	Image            *SearchImage     `json:"image"`
-	Articles         []*SearchArticle `json:"articles"`
+	Title            *SearchTitle     `json:"title" bson:"title"`
+	FormattedTraffic string           `json:"formattedTraffic" bson:"formatted_traffic"`
+	Image            *SearchImage     `json:"image" bson:"image"`
+	Articles         []*SearchArticle `json:"articles" bson:"articles"`
 }
 
 type SearchTitle struct {
-	Query string `json:"query"`
+	Query string `json:"query" bson:"query"`
 }
 
 type SearchImage struct {
-	NewsURL  string `json:"newsUrl"`
-	Source   string `json:"source"`
-	ImageURL string `json:"imageUrl"`
+	NewsURL  string `json:"newsUrl" bson:"news_url"`
+	Source   string `json:"source" bson:"source"`
+	ImageURL string `json:"imageUrl" bson:"image_url"`
 }
 
 type SearchArticle struct {
-	Title   string       `json:"title"`
-	TimeAgo string       `json:"timeAgo"`
-	Source  string       `json:"source"`
-	Image   *SearchImage `json:"image"`
-	URL     string       `json:"url"`
-	Snippet string       `json:"snippet"`
+	Title   string       `json:"title" bson:"title"`
+	TimeAgo string       `json:"timeAgo" bson:"time_ago"`
+	Source  string       `json:"source" bson:"source"`
+	Image   *SearchImage `json:"image" bson:"image"`
+	URL     string       `json:"url" bson:"url"`
+	Snippet string       `json:"snippet" bson:"snippet"`
 }
 
 type realtimeOut struct {
-	StorySummaries *storySummary `json:"storySummaries"`
+	StorySummaries *storySummary `json:"storySummaries" bson:"story_summaries"`
 }
 
 type storySummary struct {
-	TrendingStories []*TrendingStory `json:"trendingStories"`
+	TrendingStories []*TrendingStory `json:"trendingStories" bson:"trending_stories"`
 }
 
 type TrendingStory struct {
-	Title    string             `json:"title"`
-	Image    *SearchImage       `json:"image"`
-	Articles []*TrendingArticle `json:"articles"`
+	Title    string             `json:"title" bson:"title"`
+	Image    *SearchImage       `json:"image" bson:"image"`
+	Articles []*TrendingArticle `json:"articles" bson:"articles"`
 }
 
 type TrendingArticle struct {
-	Title   string `json:"articleTitle"`
-	URL     string `json:"url"`
-	Source  string `json:"source"`
-	Time    string `json:"time"`
-	Snippet string `json:"snippet"`
+	Title   string `json:"articleTitle" bson:"title"`
+	URL     string `json:"url" bson:"url"`
+	Source  string `json:"source" bson:"source"`
+	Time    string `json:"time" bson:"time"`
+	Snippet string `json:"snippet" bson:"snippet"`
 }
 
 type ExploreRequest struct {
-	ComparisonItems []*ComparisonItem `json:"comparisonItem"`
-	Category        int               `json:"category"`
-	Property        string            `json:"property"`
+	ComparisonItems []*ComparisonItem `json:"comparisonItem" bson:"comparison_items"`
+	Category        int               `json:"category" bson:"category"`
+	Property        string            `json:"property" bson:"property"`
 }
 
 type ComparisonItem struct {
-	Keyword string `json:"keyword"`
-	Geo     string `json:"geo"`
-	Time    string `json:"time"`
+	Keyword string `json:"keyword" bson:"keyword"`
+	Geo     string `json:"geo" bson:"geo"`
+	Time    string `json:"time" bson:"time"`
 }
 
 type ExploreCatTree struct {
-	Name     string            `json:"name"`
-	ID       int               `json:"id"`
-	Children []*ExploreCatTree `json:"children"`
+	Name     string            `json:"name" bson:"name"`
+	ID       int               `json:"id" bson:"id"`
+	Children []*ExploreCatTree `json:"children" bson:"children"`
 }
 
 type ExploreLocTree struct {
-	Name     string            `json:"name"`
-	ID       string            `json:"id"`
-	Children []*ExploreLocTree `json:"children"`
+	Name     string            `json:"name" bson:"name"`
+	ID       string            `json:"id" bson:"id"`
+	Children []*ExploreLocTree `json:"children" bson:"children"`
 }
 
 type exploreOut struct {
-	Widgets []*ExploreWidget `json:"widgets"`
+	Widgets []*ExploreWidget `json:"widgets" bson:"widgets"`
 }
 
 type ExploreWidget struct {
-	Token   string          `json:"token"`
-	Type    string          `json:"type"`
-	Title   string          `json:"title"`
-	ID      string          `json:"id"`
-	Request *WidgetResponse `json:"request"`
+	Token   string          `json:"token" bson:"token"`
+	Type    string          `json:"type" bson:"type"`
+	Title   string          `json:"title" bson:"title"`
+	ID      string          `json:"id" bson:"id"`
+	Request *WidgetResponse `json:"request" bson:"request"`
 }
 
 type WidgetResponse struct {
-	Geo                interface{}             `json:"geo,omitempty"`
-	Time               string                  `json:"time,omitempty"`
-	Resolution         string                  `json:"resolution,omitempty"`
-	Locale             string                  `json:"locale,omitempty"`
-	Restriction        WidgetComparisonItem    `json:"restriction"`
-	CompItem           []*WidgetComparisonItem `json:"comparisonItem"`
-	RequestOpt         RequestOptions          `json:"requestOptions"`
-	KeywordType        string                  `json:"keywordType"`
-	Metric             []string                `json:"metric"`
-	Language           string                  `json:"language"`
-	TrendinessSettings map[string]string       `json:"trendinessSettings"`
-	DataMode           string                  `json:"dataMode,omitempty"`
+	Geo                interface{}             `json:"geo,omitempty" bson:"geo"`
+	Time               string                  `json:"time,omitempty" bson:"time"`
+	Resolution         string                  `json:"resolution,omitempty" bson:"resolution"`
+	Locale             string                  `json:"locale,omitempty" bson:"locale"`
+	Restriction        WidgetComparisonItem    `json:"restriction" bson:"restriction"`
+	CompItem           []*WidgetComparisonItem `json:"comparisonItem" bson:"comparison_item"`
+	RequestOpt         RequestOptions          `json:"requestOptions" bson:"request_option"`
+	KeywordType        string                  `json:"keywordType" bson:"keyword_type"`
+	Metric             []string                `json:"metric" bson:"metric"`
+	Language           string                  `json:"language" bson:"language"`
+	TrendinessSettings map[string]string       `json:"trendinessSettings" bson:"trendiness_settings"`
+	DataMode           string                  `json:"dataMode,omitempty" bson:"data_mode"`
 }
 
 type WidgetComparisonItem struct {
-	Geo                            map[string]string   `json:"geo,omitempty"`
-	Time                           string              `json:"time,omitempty"`
-	ComplexKeywordsRestriction     KeywordsRestriction `json:"complexKeywordsRestriction,omitempty"`
-	OriginalTimeRangeForExploreUrl string              `json:"originalTimeRangeForExploreUrl,omitempty"`
+	Geo                            map[string]string   `json:"geo,omitempty" bson:"geo"`
+	Time                           string              `json:"time,omitempty" bson:"time"`
+	ComplexKeywordsRestriction     KeywordsRestriction `json:"complexKeywordsRestriction,omitempty" bson:"complex_keywords_restriction"`
+	OriginalTimeRangeForExploreURL string              `json:"originalTimeRangeForExploreUrl,omitempty" bson:"original_time_range_for_explore_url"`
 }
 
 type KeywordsRestriction struct {
-	Keyword []*KeywordRestriction `json:"keyword"`
+	Keyword []*KeywordRestriction `json:"keyword" bson:"keyword"`
 }
 
 type KeywordRestriction struct {
-	Type  string `json:"type"`
-	Value string `json:"value"`
+	Type  string `json:"type" bson:"type"`
+	Value string `json:"value" bson:"value"`
 }
 
 type RequestOptions struct {
-	Property string `json:"property"`
-	Backend  string `json:"backend"`
-	Category int    `json:"category"`
+	Property string `json:"property" bson:"property"`
+	Backend  string `json:"backend" bson:"backend"`
+	Category int    `json:"category" bson:"category"`
 }
 
 type multilineOut struct {
-	Default multiline `json:"default"`
+	Default multiline `json:"default" bson:"default"`
 }
 
 type multiline struct {
-	TimelineData []*Timeline `json:"timelineData"`
+	TimelineData []*Timeline `json:"timelineData" bson:"timeline_data"`
 }
 
 type Timeline struct {
-	Time              string   `json:"time"`
-	FormattedTime     string   `json:"formattedTime"`
-	FormattedAxisTime string   `json:"formattedAxisTime"`
-	Value             []int    `json:"value"`
-	HasData           []bool   `json:"hasData"`
-	FormattedValue    []string `json:"formattedValue"`
+	Time              string   `json:"time" bson:"time"`
+	FormattedTime     string   `json:"formattedTime" bson:"formatted_time"`
+	FormattedAxisTime string   `json:"formattedAxisTime" bson:"formatted_axis_time"`
+	Value             []int    `json:"value" bson:"value"`
+	HasData           []bool   `json:"hasData" bson:"has_data"`
+	FormattedValue    []string `json:"formattedValue" bson:"formatted_value"`
 }
 
 type geoOut struct {
-	Default geo `json:"default"`
+	Default geo `json:"default" bson:"default"`
 }
 
 type geo struct {
-	GeoMapData []*GeoMap `json:"geoMapData"`
+	GeoMapData []*GeoMap `json:"geoMapData" bson:"geomap_data"`
 }
 
 type GeoMap struct {
-	GeoCode        string   `json:"geoCode"`
-	GeoName        string   `json:"geoName"`
-	Value          []int    `json:"value"`
-	FormattedValue []string `json:"formattedValue"`
-	MaxValueIndex  int      `json:"maxValueIndex"`
-	HasData        []bool   `json:"hasData"`
+	GeoCode        string   `json:"geoCode" bson:"geo_code"`
+	GeoName        string   `json:"geoName" bson:"geo_name"`
+	Value          []int    `json:"value" bson:"value"`
+	FormattedValue []string `json:"formattedValue" bson:"formatted_value"`
+	MaxValueIndex  int      `json:"maxValueIndex" bson:"max_value_index"`
+	HasData        []bool   `json:"hasData" bson:"has_data"`
 }
 
 type relatedOut struct {
-	Default relatedList `json:"default"`
+	Default relatedList `json:"default" bson:"default"`
 }
 
 type relatedList struct {
-	Ranked []*rankedList `json:"rankedList"`
+	Ranked []*rankedList `json:"rankedList" bson:"ranked"`
 }
 
 type rankedList struct {
-	Keywords []*RankedKeyword `json:"rankedKeyword"`
+	Keywords []*RankedKeyword `json:"rankedKeyword" bson:"keywords"`
 }
 
 type RankedKeyword struct {
-	Query          string       `json:"query,omitempty"`
-	Topic          KeywordTopic `json:"topic,omitempty"`
-	Value          int          `json:"value"`
-	FormattedValue string       `json:"formattedValue"`
-	HasData        bool         `json:"hasData"`
-	Link           string       `json:"link"`
+	Query          string       `json:"query,omitempty" bson:"query"`
+	Topic          KeywordTopic `json:"topic,omitempty" bson:"topic"`
+	Value          int          `json:"value" bson:"value"`
+	FormattedValue string       `json:"formattedValue" bson:"formatted_value"`
+	HasData        bool         `json:"hasData" bson:"has_data"`
+	Link           string       `json:"link" bson:"link"`
 }
 
 type KeywordTopic struct {
-	Mid   string `json:"mid"`
-	Title string `json:"title"`
-	Type  string `json:"type"`
+	Mid   string `json:"mid" bson:"mid"`
+	Title string `json:"title" bson:"title"`
+	Type  string `json:"type" bson:"type"`
 }
