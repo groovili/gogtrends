@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/groovili/gogtrends"
+	"github.com/math-88/gogtrends"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
