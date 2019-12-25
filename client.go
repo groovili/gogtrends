@@ -40,8 +40,6 @@ func newGClient() *gClient {
 }
 
 func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
-	p := strings.Replace(u.String(), "%2B", "+", -1)
-	u, _ = u.Parse(p)
 
 	r := &http.Request{
 		URL:    u,
