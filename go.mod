@@ -1,4 +1,4 @@
-module github.com/groovili/gogtrends
+module github.com/math-88/gogtrends
 
 require (
 	github.com/json-iterator/go v1.1.5
