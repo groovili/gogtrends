@@ -1,4 +1,4 @@
-module github.com/math-88/gogtrends
+module github.com/groovili/gogtrends
 
 require (
 	github.com/json-iterator/go v1.1.5
@@ -8,3 +8,5 @@ require (
 	github.com/sirupsen/logrus v1.2.0
 	github.com/stretchr/testify v1.2.2
 )
+
+go 1.13
