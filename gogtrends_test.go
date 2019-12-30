@@ -37,12 +37,12 @@ var exploreCompareReq = &ExploreRequest{
 		{
 			Keyword: "Python",
 			Geo:     locUS,
-			Time:    "today 12-m",
+			Time:    "today+12-m",
 		},
 		{
 			Keyword: "PHP",
 			Geo:     locUS,
-			Time:    "today 12-m",
+			Time:    "today+12-m",
 		},
 		{
 			Keyword: "Паскаль",
