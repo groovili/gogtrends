@@ -127,6 +127,12 @@ func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 // is related to specific method (`InterestOverTime`, `InterestOverLoc`, `RelatedSearches`, `Suggestions`)
 // and contains required token and request information.
 func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error) {
+	
+	// hook for using incorrect `time` request (backward compatibility)
+	for _, r := range r.ComparisonItems {
+		r.Time = strings.ReplaceAll(r.Time, "+", " ")
+	}
+	
 	u, err := url.Parse(gAPI + gSExplore)
 	if err != nil {
 		return nil, err

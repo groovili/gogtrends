@@ -54,7 +54,7 @@ func main() {
 			{
 				Keyword: "Go",
 				Geo:     locUS,
-				Time:    "today+12-m",
+				Time:    "today 12-m",
 			},
 		},
 		Category: 31, // Programming category
@@ -90,17 +90,17 @@ func main() {
 			{
 				Keyword: "Go",
 				Geo:     locUS,
-				Time:    "today+12-m",
+				Time:    "today 12-m",
 			},
 			{
 				Keyword: "Python",
 				Geo:     locUS,
-				Time:    "today+12-m",
+				Time:    "today 12-m",
 			},
 			{
 				Keyword: "PHP",
 				Geo:     locUS,
-				Time:    "today+12-m",
+				Time:    "today 12-m",
 			},
 		},
 		Category: 31, // Programming category

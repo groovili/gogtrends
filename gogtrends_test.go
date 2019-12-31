@@ -20,7 +20,7 @@ var exploreReq = &ExploreRequest{
 		{
 			Keyword: "Golang",
 			Geo:     locUS,
-			Time:    "today+12-m",
+			Time:    "today 12-m",
 		},
 	},
 	Category: 31, // Programming category
@@ -32,7 +32,7 @@ var exploreCompareReq = &ExploreRequest{
 		{
 			Keyword: "Golang",
 			Geo:     locUS,
-			Time:    "today+12-m",
+			Time:    "today 12-m",
 		},
 		{
 			Keyword: "Python",
@@ -43,6 +43,11 @@ var exploreCompareReq = &ExploreRequest{
 			Keyword: "PHP",
 			Geo:     locUS,
 			Time:    "today+12-m",
+		},
+		{
+			Keyword: "Паскаль",
+			Geo:     locUS,
+			Time:    "today 12-m",
 		},
 	},
 	Category: 31, // Programming category
