@@ -19,7 +19,6 @@ var exploreReq = &ExploreRequest{
 	ComparisonItems: []*ComparisonItem{
 		{
 			Keyword: "Golang",
-			Geo:     locUS,
 			Time:    "today 12-m",
 		},
 	},

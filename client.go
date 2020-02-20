@@ -40,7 +40,6 @@ func newGClient() *gClient {
 }
 
 func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
-
 	r := &http.Request{
 		URL:    u,
 		Method: http.MethodGet,
@@ -118,7 +117,9 @@ func (c *gClient) trends(ctx context.Context, path, hl, loc string, args ...map[
 
 	// required params
 	p := client.defParams
-	p.Set(paramGeo, loc)
+	if len(loc) > 0 {
+		p.Set(paramGeo, loc)
+	}
 	p.Set(paramHl, hl)
 
 	// additional params

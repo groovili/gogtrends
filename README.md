@@ -99,7 +99,7 @@ explore, err := gogtrends.Explore(ctx,
                 {
                     Keyword: "Go",
                     Geo:     "US",
-                    Time:    "today+12-m",
+                    Time:    "today 12-m",
                 },
             },
             Category: 31, // Programming category
@@ -125,17 +125,17 @@ compare, err := gogtrends.Explore(ctx,
                 {
                     Keyword: "Go",
                     Geo:     "US",
-                    Time:    "today+12-m",
+                    Time:    "today 12-m",
                 },
                 {
                     Keyword: "Python",
                     Geo:     "US",
-                    Time:    "today+12-m",
+                    Time:    "today 12-m",
                 },
                 {
                     Keyword: "PHP",
                     Geo:     "US",
-                    Time:    "today+12-m",
+                    Time:    "today 12-m",
                 },                               
             },
             Category: 31, // Programming category
