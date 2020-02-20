@@ -127,12 +127,11 @@ func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 // is related to specific method (`InterestOverTime`, `InterestOverLoc`, `RelatedSearches`, `Suggestions`)
 // and contains required token and request information.
 func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error) {
-	
 	// hook for using incorrect `time` request (backward compatibility)
 	for _, r := range r.ComparisonItems {
 		r.Time = strings.ReplaceAll(r.Time, "+", " ")
 	}
-	
+
 	u, err := url.Parse(gAPI + gSExplore)
 	if err != nil {
 		return nil, err
@@ -182,6 +181,12 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 	p.Set(paramTZ, "0")
 	p.Set(paramHl, hl)
 	p.Set(paramToken, w.Token)
+
+	for i, v := range w.Request.CompItem {
+		if len(v.Geo) == 0 {
+			w.Request.CompItem[i].Geo[""] = ""
+		}
+	}
 
 	// marshal request for query param
 	mReq, err := jsoniter.MarshalToString(w.Request)
@@ -268,6 +273,10 @@ func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword
 	p.Set(paramTZ, "0")
 	p.Set(paramHl, hl)
 	p.Set(paramToken, w.Token)
+
+	if len(w.Request.Restriction.Geo) == 0 {
+		w.Request.Restriction.Geo[""] = ""
+	}
 
 	// marshal request for query param
 	mReq, err := jsoniter.MarshalToString(w.Request)

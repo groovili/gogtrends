@@ -42,7 +42,6 @@ var (
 		paramCat: "all",
 		"fi":     "0",
 		"fs":     "0",
-		paramGeo: "US",
 		paramHl:  "EN",
 		"ri":     "300",
 		"rs":     "20",
@@ -127,7 +126,7 @@ type ExploreRequest struct {
 
 type ComparisonItem struct {
 	Keyword string `json:"keyword" bson:"keyword"`
-	Geo     string `json:"geo" bson:"geo"`
+	Geo     string `json:"geo,omitempty" bson:"geo"`
 	Time    string `json:"time" bson:"time"`
 }
 
