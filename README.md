@@ -6,6 +6,8 @@
 
 **gogtrends** is API wrapper which allows to get reports from Google Trends.
 
+[GoDoc](https://godoc.org/github.com/groovili/gogtrends).
+
 All contributions, updates and issues are warmly welcome.
 
 ### Installation 
