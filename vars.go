@@ -167,6 +167,7 @@ type WidgetResponse struct {
 	Language           string                  `json:"language" bson:"language"`
 	TrendinessSettings map[string]string       `json:"trendinessSettings" bson:"trendiness_settings"`
 	DataMode           string                  `json:"dataMode,omitempty" bson:"data_mode"`
+	UserCountryCode    string                  `json:"userCountryCode" bson:"user_country_code"`
 }
 
 type WidgetComparisonItem struct {
