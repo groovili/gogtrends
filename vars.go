@@ -10,7 +10,6 @@ const (
 	gSCategories  = "/explore/pickers/category"
 	gSGeo         = "/explore/pickers/geo"
 	gSRelated     = "/widgetdata/relatedsearches"
-	gSSuggestions = "/autocomplete"
 	gSIntOverTime = "/widgetdata/multiline"
 	gSIntOverReg  = "/widgetdata/comparedgeo"
 
@@ -27,13 +26,6 @@ const (
 	relatedTopicsID     = "RELATED_TOPICS"
 
 	compareDataMode = "PERCENTAGES"
-
-	errParsing           = "failed to parse json"
-	errRequestFailed     = "failed to perform http request to API"
-	errReqDataF          = "request data: code = %d, status = %s, body = %s"
-	errInvalidCategory   = "invalid category param"
-	errInvalidRequest    = "invalid request param"
-	errInvalidWidgetType = "invalid widget type"
 )
 
 var (

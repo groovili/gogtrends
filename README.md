@@ -2,9 +2,7 @@
 
 ###### Unofficial Google Trends API for Golang
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/groovili/gogtrends)](https://goreportcard.com/report/github.com/groovili/gogtrends)
-
-[![License](https://img.shields.io/badge/licence-MIT-blue.svg)](https://github.com/groovili/gogtrends/blob/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/groovili/gogtrends/badge.svg)](https://coveralls.io/github/groovili/gogtrends) [![Go Report Card](https://goreportcard.com/badge/github.com/groovili/gogtrends)](https://goreportcard.com/report/github.com/groovili/gogtrends) [![License](https://img.shields.io/badge/licence-MIT-blue.svg)](https://github.com/groovili/gogtrends/blob/master/LICENSE)
 
 **gogtrends** is API wrapper which allows to get reports from Google Trends.
 
@@ -12,13 +10,7 @@ All contributions, updates and issues are warmly welcome.
 
 ### Installation 
 
-Go modules support is required to use this package, also all dependencies can be found in `go.sum` file.
-
-```bash 
-export GO111MODULE=on
-```
-
-Add `github.com/groovili/gogtrends` as import and run `go build` or manually require in `go.mod` file.
+``go get -u github.com/groovili/gogtrends``
 
 #### Debug
 

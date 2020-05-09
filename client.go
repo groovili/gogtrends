@@ -13,6 +13,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	headerKeyAccept    = "Accept"
+	headerKeyCookie    = "Cookie"
+	headerKeySetCookie = "Set-Cookie"
+	contentTypeJSON    = "application/json"
+)
+
 type gClient struct {
 	c           *http.Client
 	defParams   url.Values
@@ -34,24 +41,20 @@ func newGClient() *gClient {
 		c:          http.DefaultClient,
 		defParams:  p,
 		trendsCats: trendsCategories,
-		cookie:     "",
-		debug:      false,
 	}
 }
 
 func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
-	r := &http.Request{
-		URL:    u,
-		Method: http.MethodGet,
-	}
-	r = r.WithContext(ctx)
-
-	r.Header = make(http.Header)
-	if client.cookie != "" {
-		r.Header.Add("Cookie", client.cookie)
+	r, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, errCreateRequest)
 	}
 
-	r.Header.Add("Accept", "application/json")
+	r.Header.Add(headerKeyAccept, contentTypeJSON)
+
+	if len(client.cookie) != 0 {
+		r.Header.Add(headerKeyCookie, client.cookie)
+	}
 
 	if client.debug {
 		log.Info("[Debug] Request with params: ", r.URL)
@@ -59,46 +62,33 @@ func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
 
 	resp, err := c.c.Do(r)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, errDoRequest)
 	}
+	defer resp.Body.Close()
 
 	if client.debug {
 		log.Info("[Debug] Response: ", resp)
 	}
 
 	if resp.StatusCode == http.StatusTooManyRequests {
-		cookie := strings.Split(resp.Header.Get("Set-Cookie"), ";")
+		cookie := strings.Split(resp.Header.Get(headerKeySetCookie), ";")
 		if len(cookie) > 0 {
 			client.cookie = cookie[0]
-			r.Header.Set("Cookie", cookie[0])
+			r.Header.Set(headerKeyCookie, cookie[0])
 
 			resp, err = c.c.Do(r)
 			if err != nil {
 				return nil, err
 			}
+			defer resp.Body.Close()
 		}
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Wrapf(errors.New(errRequestFailed), errReqDataF, resp.StatusCode, resp.Status, resp.Body)
+		return nil, errors.Wrapf(ErrRequestFailed, errReqDataF, resp.StatusCode, resp.Status)
 	}
 
-	data, err := c.getRespData(resp)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
-}
-
-func (c *gClient) getRespData(resp *http.Response) ([]byte, error) {
-	b, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
+	return ioutil.ReadAll(resp.Body)
 }
 
 func (c *gClient) unmarshal(str string, dest interface{}) error {
@@ -110,10 +100,7 @@ func (c *gClient) unmarshal(str string, dest interface{}) error {
 }
 
 func (c *gClient) trends(ctx context.Context, path, hl, loc string, args ...map[string]string) (string, error) {
-	u, err := url.Parse(path)
-	if err != nil {
-		return "", err
-	}
+	u, _ := url.Parse(path)
 
 	// required params
 	p := client.defParams

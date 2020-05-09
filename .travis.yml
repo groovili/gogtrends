@@ -1,17 +1,19 @@
 language: go
 
 go:
-- "1.11.x"
+- 1.x
+- 1.14.x
 - master
 
 install:
+- export GO111MODULE=on
 - go build
 - go get github.com/mattn/goveralls
 - go get golang.org/x/tools/cmd/cover
 
 script:
 - go test -v -race ./.
-- goveralls -service=travis-ci
+- $GOPATH/bin/goveralls -service=travis-ci
 
 notifications:
-  email: false
+  email: true
