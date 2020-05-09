@@ -39,9 +39,7 @@ func Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error) {
 	// split searches by days together
 	searches := make([]*TrendingSearch, 0)
 	for _, v := range out.Default.Searches {
-		for _, k := range v.Searches {
-			searches = append(searches, k)
-		}
+		searches = append(searches, v.Searches...)
 	}
 
 	return searches, nil
@@ -50,7 +48,7 @@ func Daily(ctx context.Context, hl, loc string) ([]*TrendingSearch, error) {
 // Realtime represents realtime trends with included articles and sources.
 func Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error) {
 	if !client.validateCategory(cat) {
-		return nil, errors.New(errInvalidCategory)
+		return nil, ErrInvalidCategory
 	}
 
 	data, err := client.trends(ctx, gAPI+gRealtime, hl, loc, map[string]string{paramCat: cat})
@@ -75,12 +73,12 @@ func ExploreCategories(ctx context.Context) (*ExploreCatTree, error) {
 		return client.exploreCats, nil
 	}
 
-	u, err := url.Parse(gAPI + gSCategories)
+	u, _ := url.Parse(gAPI + gSCategories)
+
+	b, err := client.do(ctx, u)
 	if err != nil {
 		return nil, err
 	}
-
-	b, err := client.do(ctx, u)
 
 	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}'", "", 1)
@@ -102,12 +100,12 @@ func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 		return client.exploreLocs, nil
 	}
 
-	u, err := url.Parse(gAPI + gSGeo)
+	u, _ := url.Parse(gAPI + gSGeo)
+
+	b, err := client.do(ctx, u)
 	if err != nil {
 		return nil, err
 	}
-
-	b, err := client.do(ctx, u)
 
 	// google api returns not valid json :(
 	str := strings.Replace(string(b), ")]}'", "", 1)
@@ -132,10 +130,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 		r.Time = strings.ReplaceAll(r.Time, "+", " ")
 	}
 
-	u, err := url.Parse(gAPI + gSExplore)
-	if err != nil {
-		return nil, err
-	}
+	u, _ := url.Parse(gAPI + gSExplore)
 
 	p := make(url.Values)
 	p.Set(paramTZ, "0")
@@ -169,13 +164,10 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 // InterestOverTime as list of `Timeline` dots for chart.
 func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Timeline, error) {
 	if w.ID != intOverTimeWidgetID {
-		return nil, errors.New(errInvalidWidgetType)
+		return nil, ErrInvalidWidgetType
 	}
 
-	u, err := url.Parse(gAPI + gSIntOverTime)
-	if err != nil {
-		return nil, err
-	}
+	u, _ := url.Parse(gAPI + gSIntOverTime)
 
 	p := make(url.Values)
 	p.Set(paramTZ, "0")
@@ -216,13 +208,10 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 // InterestByLocation as list of `GeoMap`, with geo codes and interest values.
 func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*GeoMap, error) {
 	if w.ID != intOverRegionID {
-		return nil, errors.New(errInvalidWidgetType)
+		return nil, ErrInvalidWidgetType
 	}
 
-	u, err := url.Parse(gAPI + gSIntOverReg)
-	if err != nil {
-		return nil, err
-	}
+	u, _ := url.Parse(gAPI + gSIntOverReg)
 
 	p := make(url.Values)
 	p.Set(paramTZ, "0")
@@ -261,13 +250,10 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 // Related topics or queries, list of `RankedKeyword`, supports two types of widgets.
 func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword, error) {
 	if w.ID != relatedQueriesID && w.ID != relatedTopicsID {
-		return nil, errors.New(errInvalidWidgetType)
+		return nil, ErrInvalidWidgetType
 	}
 
-	u, err := url.Parse(gAPI + gSRelated)
-	if err != nil {
-		return nil, err
-	}
+	u, _ := url.Parse(gAPI + gSRelated)
 
 	p := make(url.Values)
 	p.Set(paramTZ, "0")
@@ -304,7 +290,6 @@ func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword
 	keywords := make([]*RankedKeyword, 0)
 	for _, v := range out.Default.Ranked {
 		keywords = append(keywords, v.Keywords...)
-
 	}
 
 	return keywords, nil
