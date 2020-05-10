@@ -2,11 +2,9 @@
 
 ###### Unofficial Google Trends API for Golang
 
-[![Coverage Status](https://coveralls.io/repos/github/groovili/gogtrends/badge.svg)](https://coveralls.io/github/groovili/gogtrends) [![Go Report Card](https://goreportcard.com/badge/github.com/groovili/gogtrends)](https://goreportcard.com/report/github.com/groovili/gogtrends) [![License](https://img.shields.io/badge/licence-MIT-blue.svg)](https://github.com/groovili/gogtrends/blob/master/LICENSE)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/groovili/gogtrends) [![Coverage Status](https://coveralls.io/repos/github/groovili/gogtrends/badge.svg)](https://coveralls.io/github/groovili/gogtrends) [![Go Report Card](https://goreportcard.com/badge/github.com/groovili/gogtrends)](https://goreportcard.com/report/github.com/groovili/gogtrends) [![License](https://img.shields.io/badge/licence-MIT-blue.svg)](https://github.com/groovili/gogtrends/blob/master/LICENSE)
 
 **gogtrends** is API wrapper which allows to get reports from Google Trends.
-
-[GoDoc](https://godoc.org/github.com/groovili/gogtrends).
 
 All contributions, updates and issues are warmly welcome.
 
