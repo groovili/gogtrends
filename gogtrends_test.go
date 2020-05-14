@@ -2,6 +2,7 @@ package gogtrends
 
 import (
 	"context"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,48 +13,10 @@ const (
 	catAll = "all"
 	langEN = "EN"
 
-	loadTestNum = 20 // changed for test speed up
+	concurrentGoroutinesNum = 10
+	loadTestNum             = 20 // changed for test speed up
+	catProgramming          = 31
 )
-
-var exploreReq = &ExploreRequest{
-	ComparisonItems: []*ComparisonItem{
-		{
-			Keyword: "Golang",
-			Time:    "today 12-m",
-		},
-	},
-	Category: 31, // Programming category
-	Property: "",
-}
-
-var exploreCompareReq = &ExploreRequest{
-	ComparisonItems: []*ComparisonItem{
-		{
-			Keyword: "Golang",
-			Geo:     locUS,
-			Time:    "today 12-m",
-		},
-		{
-			Keyword: "Python",
-			Geo:     locUS,
-			Time:    "today+12-m",
-		},
-		{
-			Keyword: "PHP",
-			Geo:     locUS,
-			Time:    "today+12-m",
-		},
-		{
-			Keyword: "Паскаль",
-			Geo:     locUS,
-			Time:    "today 12-m",
-		},
-	},
-	Category: 31, // Programming category
-	Property: "",
-}
-
-var widgets4Load []*ExploreWidget
 
 func TestDailyTrending(t *testing.T) {
 	resp, err := Daily(context.Background(), langEN, locUS)
@@ -72,27 +35,82 @@ func TestRealtimeTrending(t *testing.T) {
 	assert.True(t, len(resp[0].Title) > 0)
 }
 
+func TestRealtimeTrendingConcurrent(t *testing.T) {
+	wg := new(sync.WaitGroup)
+	wg.Add(concurrentGoroutinesNum)
+	for i := 0; i < concurrentGoroutinesNum; i++ {
+		go func() {
+			defer wg.Done()
+
+			categories := TrendsCategories()
+			assert.True(t, len(categories) > 0)
+			_, ok := categories[catAll]
+			assert.True(t, ok)
+
+			resp, err := Realtime(context.Background(), langEN, locUS, catAll)
+			assert.NoError(t, err)
+			assert.True(t, len(resp[0].Title) > 0)
+		}()
+	}
+	wg.Wait()
+}
+
 func TestExploreCategories(t *testing.T) {
-	exploreCats, err := ExploreCategories(context.Background())
-	assert.NoError(t, err)
-	assert.True(t, len(exploreCats.Children) > 0)
+	wg := new(sync.WaitGroup)
+	wg.Add(concurrentGoroutinesNum)
+	for i := 0; i < concurrentGoroutinesNum; i++ {
+		go func() {
+			defer wg.Done()
+
+			exploreCats, err := ExploreCategories(context.Background())
+			assert.NoError(t, err)
+			assert.True(t, len(exploreCats.Children) > 0)
+		}()
+	}
 }
 
 func TestExploreLocations(t *testing.T) {
-	exploreLocs, err := ExploreLocations(context.Background())
-	assert.NoError(t, err)
-	assert.True(t, len(exploreLocs.Children) > 0)
+	wg := new(sync.WaitGroup)
+	wg.Add(concurrentGoroutinesNum)
+	for i := 0; i < concurrentGoroutinesNum; i++ {
+		go func() {
+			defer wg.Done()
+
+			exploreLocs, err := ExploreLocations(context.Background())
+			assert.NoError(t, err)
+			assert.True(t, len(exploreLocs.Children) > 0)
+		}()
+	}
 }
 
 func TestExplore(t *testing.T) {
-	explore, err := Explore(context.Background(), exploreReq, langEN)
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+	explore, err := Explore(context.Background(), req, langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
-	widgets4Load = explore
 }
 
 func TestInterestOverTime(t *testing.T) {
-	explore, err := Explore(context.Background(), exploreReq, langEN)
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+	explore, err := Explore(context.Background(), req, langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
 
@@ -102,7 +120,17 @@ func TestInterestOverTime(t *testing.T) {
 }
 
 func TestInterestByLocation(t *testing.T) {
-	explore, err := Explore(context.Background(), exploreReq, langEN)
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+	explore, err := Explore(context.Background(), req, langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
 
@@ -111,8 +139,50 @@ func TestInterestByLocation(t *testing.T) {
 	assert.True(t, len(byLoc) > 0)
 }
 
+func TestInterestByLocationConcurrent(t *testing.T) {
+	wg := new(sync.WaitGroup)
+
+	wg.Add(concurrentGoroutinesNum)
+	for i := 0; i < concurrentGoroutinesNum; i++ {
+		go func() {
+			defer wg.Done()
+
+			req := &ExploreRequest{
+				ComparisonItems: []*ComparisonItem{
+					{
+						Keyword: "Golang",
+						Time:    "today 12-m",
+					},
+				},
+				Category: 31, // Programming category
+				Property: "",
+			}
+
+			explore, err := Explore(context.Background(), req, langEN)
+			assert.NoError(t, err)
+			assert.True(t, len(explore) == 4)
+
+			byLoc, err := InterestByLocation(context.Background(), explore[1], langEN)
+			assert.NoError(t, err)
+			assert.True(t, len(byLoc) > 0)
+		}()
+	}
+
+	wg.Wait()
+}
+
 func TestRelated(t *testing.T) {
-	explore, err := Explore(context.Background(), exploreReq, langEN)
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+	explore, err := Explore(context.Background(), req, langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(explore) == 4)
 
@@ -158,11 +228,25 @@ func TestLoadRealtime(t *testing.T) {
 }
 
 func TestLoadOverTime(t *testing.T) {
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+	explore, err := Explore(context.Background(), req, langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(explore) == 4)
+
 	res := make([][]*Timeline, loadTestNum)
 	errors := make([]error, loadTestNum)
 
 	for i := 0; i < loadTestNum; i++ {
-		res[i], errors[i] = InterestOverTime(context.Background(), widgets4Load[0], langEN)
+		res[i], errors[i] = InterestOverTime(context.Background(), explore[0], langEN)
 	}
 
 	for _, e := range errors {
@@ -175,11 +259,25 @@ func TestLoadOverTime(t *testing.T) {
 }
 
 func TestLoadByLocation(t *testing.T) {
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+	explore, err := Explore(context.Background(), req, langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(explore) == 4)
+
 	res := make([][]*GeoMap, loadTestNum)
 	errors := make([]error, loadTestNum)
 
 	for i := 0; i < loadTestNum; i++ {
-		res[i], errors[i] = InterestByLocation(context.Background(), widgets4Load[1], langEN)
+		res[i], errors[i] = InterestByLocation(context.Background(), explore[1], langEN)
 	}
 
 	for _, e := range errors {
@@ -192,7 +290,33 @@ func TestLoadByLocation(t *testing.T) {
 }
 
 func TestCompareInterest(t *testing.T) {
-	explore, err := Explore(context.Background(), exploreCompareReq, langEN)
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Python",
+				Geo:     locUS,
+				Time:    "today+12-m",
+			},
+			{
+				Keyword: "PHP",
+				Geo:     locUS,
+				Time:    "today+12-m",
+			},
+			{
+				Keyword: "Паскаль",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+	explore, err := Explore(context.Background(), req, langEN)
 	assert.NoError(t, err)
 
 	// interest over time for 3 compared items in one chart
@@ -204,4 +328,54 @@ func TestCompareInterest(t *testing.T) {
 	byLoc, err := InterestByLocation(context.Background(), explore[1], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(byLoc) > 0)
+}
+
+func TestCompareInterestConcurrent(t *testing.T) {
+	wg := new(sync.WaitGroup)
+	wg.Add(concurrentGoroutinesNum)
+	for i := 0; i < concurrentGoroutinesNum; i++ {
+		go func() {
+			defer wg.Done()
+
+			req := &ExploreRequest{
+				ComparisonItems: []*ComparisonItem{
+					{
+						Keyword: "Golang",
+						Geo:     locUS,
+						Time:    "today 12-m",
+					},
+					{
+						Keyword: "Python",
+						Geo:     locUS,
+						Time:    "today+12-m",
+					},
+					{
+						Keyword: "PHP",
+						Geo:     locUS,
+						Time:    "today+12-m",
+					},
+					{
+						Keyword: "Паскаль",
+						Geo:     locUS,
+						Time:    "today 12-m",
+					},
+				},
+				Category: catProgramming,
+				Property: "",
+			}
+
+			explore, err := Explore(context.Background(), req, langEN)
+			assert.NoError(t, err)
+
+			// interest over time for 3 compared items in one chart
+			overTime, err := InterestOverTime(context.Background(), explore[0], langEN)
+			assert.NoError(t, err)
+			assert.True(t, len(overTime) > 0)
+
+			// interest over time for 3 compared items in one map
+			byLoc, err := InterestByLocation(context.Background(), explore[1], langEN)
+			assert.NoError(t, err)
+			assert.True(t, len(byLoc) > 0)
+		}()
+	}
 }

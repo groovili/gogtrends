@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	jsoniter "github.com/json-iterator/go"
 
@@ -21,13 +22,20 @@ const (
 )
 
 type gClient struct {
-	c           *http.Client
-	defParams   url.Values
-	trendsCats  map[string]string
+	c         *http.Client
+	defParams url.Values
+
+	tcm        *sync.RWMutex
+	trendsCats map[string]string
+
+	cm          *sync.RWMutex
 	exploreCats *ExploreCatTree
+
+	lm          *sync.RWMutex
 	exploreLocs *ExploreLocTree
-	cookie      string
-	debug       bool
+
+	cookie string
+	debug  bool
 }
 
 func newGClient() *gClient {
@@ -40,8 +48,45 @@ func newGClient() *gClient {
 	return &gClient{
 		c:          http.DefaultClient,
 		defParams:  p,
+		tcm:        new(sync.RWMutex),
 		trendsCats: trendsCategories,
+		cm:         new(sync.RWMutex),
+		lm:         new(sync.RWMutex),
 	}
+}
+
+func (c *gClient) defaultParams() url.Values {
+	out := make(map[string][]string, len(c.defParams))
+	for i, v := range c.defParams {
+		out[i] = make([]string, len(v))
+		copy(out[i], v)
+	}
+
+	return out
+}
+
+func (c *gClient) getCategories() *ExploreCatTree {
+	c.cm.RLock()
+	defer c.cm.RUnlock()
+	return c.exploreCats
+}
+
+func (c *gClient) setCategories(cats *ExploreCatTree) {
+	c.cm.Lock()
+	defer c.cm.Unlock()
+	c.exploreCats = cats
+}
+
+func (c *gClient) getLocations() *ExploreLocTree {
+	c.lm.RLock()
+	defer c.lm.RUnlock()
+	return c.exploreLocs
+}
+
+func (c *gClient) setLocations(locs *ExploreLocTree) {
+	c.lm.Lock()
+	defer c.lm.Unlock()
+	c.exploreLocs = locs
 }
 
 func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
@@ -103,7 +148,7 @@ func (c *gClient) trends(ctx context.Context, path, hl, loc string, args ...map[
 	u, _ := url.Parse(path)
 
 	// required params
-	p := client.defParams
+	p := client.defaultParams()
 	if len(loc) > 0 {
 		p.Set(paramGeo, loc)
 	}
@@ -129,7 +174,9 @@ func (c *gClient) trends(ctx context.Context, path, hl, loc string, args ...map[
 }
 
 func (c *gClient) validateCategory(cat string) bool {
+	c.tcm.RLock()
 	_, ok := client.trendsCats[cat]
+	c.tcm.RUnlock()
 
 	return ok
 }
