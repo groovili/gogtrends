@@ -69,8 +69,8 @@ func Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error
 
 // ExploreCategories gets available categories for explore and comparison and caches it in client.
 func ExploreCategories(ctx context.Context) (*ExploreCatTree, error) {
-	if client.exploreCats != nil {
-		return client.exploreCats, nil
+	if cats := client.getCategories(); cats != nil {
+		return cats, nil
 	}
 
 	u, _ := url.Parse(gAPI + gSCategories)
@@ -89,15 +89,15 @@ func ExploreCategories(ctx context.Context) (*ExploreCatTree, error) {
 	}
 
 	// cache in client
-	client.exploreCats = out
+	client.setCategories(out)
 
 	return out, nil
 }
 
 // ExploreLocations gets available locations for explore and comparison and caches it in client.
 func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
-	if client.exploreLocs != nil {
-		return client.exploreLocs, nil
+	if locs := client.getLocations(); locs != nil {
+		return locs, nil
 	}
 
 	u, _ := url.Parse(gAPI + gSGeo)
@@ -116,7 +116,7 @@ func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 	}
 
 	// cache in client
-	client.exploreLocs = out
+	client.setLocations(out)
 
 	return out, nil
 }
