@@ -12,7 +12,7 @@ install:
 - go get golang.org/x/tools/cmd/cover
 
 script:
-- go test -v -race -parallel 2 ./.
+- go test -v -race -parallel 2 -coverprofile=coverage.txt -covermode=atomic ./.
 - $GOPATH/bin/goveralls -service=travis-ci
 
 after_success:
