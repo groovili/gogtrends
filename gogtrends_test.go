@@ -18,7 +18,15 @@ const (
 	catProgramming          = 31
 )
 
+func TestDebug(t *testing.T) {
+	Debug(true)
+	assert.True(t, client.debug)
+}
+
 func TestDailyTrending(t *testing.T) {
+	_, err := Daily(context.Background(), "unknown", "Kashyyyk")
+	assert.Error(t, err)
+
 	resp, err := Daily(context.Background(), langEN, locUS)
 	assert.NoError(t, err)
 	assert.True(t, len(resp[0].Title.Query) > 0)
@@ -29,6 +37,9 @@ func TestRealtimeTrending(t *testing.T) {
 	assert.True(t, len(categories) > 0)
 	_, ok := categories[catAll]
 	assert.True(t, ok)
+
+	_, err := Realtime(context.Background(), langEN, locUS, "random")
+	assert.Error(t, err)
 
 	resp, err := Realtime(context.Background(), langEN, locUS, catAll)
 	assert.NoError(t, err)
@@ -117,6 +128,10 @@ func TestInterestOverTime(t *testing.T) {
 	overTime, err := InterestOverTime(context.Background(), explore[0], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(overTime) > 0)
+
+	explore[0].ID = ""
+	_, err = InterestOverTime(context.Background(), explore[0], langEN)
+	assert.Error(t, err)
 }
 
 func TestInterestByLocation(t *testing.T) {
@@ -137,6 +152,10 @@ func TestInterestByLocation(t *testing.T) {
 	byLoc, err := InterestByLocation(context.Background(), explore[1], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(byLoc) > 0)
+
+	explore[1].ID = ""
+	_, err = InterestByLocation(context.Background(), explore[1], langEN)
+	assert.Error(t, err)
 }
 
 func TestInterestByLocationConcurrent(t *testing.T) {
@@ -193,6 +212,10 @@ func TestRelated(t *testing.T) {
 	relatedQueries, err := Related(context.Background(), explore[3], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(relatedQueries) > 0)
+
+	explore[3].ID = ""
+	_, err = Related(context.Background(), explore[3], langEN)
+	assert.Error(t, err)
 }
 
 func TestLoadDaily(t *testing.T) {
