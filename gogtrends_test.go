@@ -21,6 +21,7 @@ const (
 func TestDebug(t *testing.T) {
 	Debug(true)
 	assert.True(t, client.debug)
+	Debug(false)
 }
 
 func TestDailyTrending(t *testing.T) {
