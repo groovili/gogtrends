@@ -15,5 +15,8 @@ script:
 - go test -v -race -parallel 2 ./.
 - $GOPATH/bin/goveralls -service=travis-ci
 
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+
 notifications:
   email: true
