@@ -62,6 +62,7 @@ type trendingSearchDays struct {
 	Searches      []*TrendingSearch `json:"trendingSearches" bson:"searches"`
 }
 
+// TrendingSearch is a representation trending search in period of 24 hours
 type TrendingSearch struct {
 	Title            *SearchTitle     `json:"title" bson:"title"`
 	FormattedTraffic string           `json:"formattedTraffic" bson:"formatted_traffic"`
@@ -69,16 +70,19 @@ type TrendingSearch struct {
 	Articles         []*SearchArticle `json:"articles" bson:"articles"`
 }
 
+// SearchTitle is a user query string for daily trending search
 type SearchTitle struct {
 	Query string `json:"query" bson:"query"`
 }
 
+// SearchImage is a picture of trending search
 type SearchImage struct {
 	NewsURL  string `json:"newsUrl" bson:"news_url"`
 	Source   string `json:"source" bson:"source"`
 	ImageURL string `json:"imageUrl" bson:"image_url"`
 }
 
+// SearchArticle is a news relative to trending search
 type SearchArticle struct {
 	Title   string       `json:"title" bson:"title"`
 	TimeAgo string       `json:"timeAgo" bson:"time_ago"`
@@ -96,12 +100,14 @@ type storySummary struct {
 	TrendingStories []*TrendingStory `json:"trendingStories" bson:"trending_stories"`
 }
 
+// TrendingStory is a representation of realtime trend
 type TrendingStory struct {
 	Title    string             `json:"title" bson:"title"`
 	Image    *SearchImage       `json:"image" bson:"image"`
 	Articles []*TrendingArticle `json:"articles" bson:"articles"`
 }
 
+// TrendingArticle is an article relative to trending story
 type TrendingArticle struct {
 	Title   string `json:"articleTitle" bson:"title"`
 	URL     string `json:"url" bson:"url"`
@@ -110,24 +116,30 @@ type TrendingArticle struct {
 	Snippet string `json:"snippet" bson:"snippet"`
 }
 
+// ExploreRequest it's an input which can contain multiple items (keywords) to discover
+// category can be found in ExploreCategories output
 type ExploreRequest struct {
 	ComparisonItems []*ComparisonItem `json:"comparisonItem" bson:"comparison_items"`
 	Category        int               `json:"category" bson:"category"`
 	Property        string            `json:"property" bson:"property"`
 }
 
+// ComparisonItem it's concrete search keyword
+// with Geo (can be found with ExploreLocations method) locality and Time period
 type ComparisonItem struct {
 	Keyword string `json:"keyword" bson:"keyword"`
 	Geo     string `json:"geo,omitempty" bson:"geo"`
 	Time    string `json:"time" bson:"time"`
 }
 
+// ExploreCatTree - available categories list tree
 type ExploreCatTree struct {
 	Name     string            `json:"name" bson:"name"`
 	ID       int               `json:"id" bson:"id"`
 	Children []*ExploreCatTree `json:"children" bson:"children"`
 }
 
+// ExploreLocTree - available locations list tree
 type ExploreLocTree struct {
 	Name     string            `json:"name" bson:"name"`
 	ID       string            `json:"id" bson:"id"`
@@ -138,6 +150,8 @@ type exploreOut struct {
 	Widgets []*ExploreWidget `json:"widgets" bson:"widgets"`
 }
 
+// ExploreWidget - output of Explore method, required for InterestOverTime, InterestByLocation and Related methods.
+// Globally it's a structure related to Google Trends UI and contains mostly system info
 type ExploreWidget struct {
 	Token   string          `json:"token" bson:"token"`
 	Type    string          `json:"type" bson:"type"`
@@ -146,6 +160,7 @@ type ExploreWidget struct {
 	Request *WidgetResponse `json:"request" bson:"request"`
 }
 
+// WidgetResponse - system info for every available trends search mode
 type WidgetResponse struct {
 	Geo                interface{}             `json:"geo,omitempty" bson:"geo"`
 	Time               string                  `json:"time,omitempty" bson:"time"`
@@ -162,6 +177,7 @@ type WidgetResponse struct {
 	UserCountryCode    string                  `json:"userCountryCode,omitempty" bson:"user_country_code"`
 }
 
+// WidgetComparisonItem - system info for comparison item part of WidgetResponse
 type WidgetComparisonItem struct {
 	Geo                            map[string]string   `json:"geo,omitempty" bson:"geo"`
 	Time                           string              `json:"time,omitempty" bson:"time"`
@@ -169,15 +185,18 @@ type WidgetComparisonItem struct {
 	OriginalTimeRangeForExploreURL string              `json:"originalTimeRangeForExploreUrl,omitempty" bson:"original_time_range_for_explore_url"`
 }
 
+// KeywordsRestriction - system info for keywords limitations, not used. part of WidgetResponse
 type KeywordsRestriction struct {
 	Keyword []*KeywordRestriction `json:"keyword" bson:"keyword"`
 }
 
+// KeywordRestriction - specific keyword limitation. Part of KeywordsRestriction
 type KeywordRestriction struct {
 	Type  string `json:"type" bson:"type"`
 	Value string `json:"value" bson:"value"`
 }
 
+// RequestOptions - part of WidgetResponse
 type RequestOptions struct {
 	Property string `json:"property" bson:"property"`
 	Backend  string `json:"backend" bson:"backend"`
@@ -192,6 +211,7 @@ type multiline struct {
 	TimelineData []*Timeline `json:"timelineData" bson:"timeline_data"`
 }
 
+// Timeline - it's representation of interest to trend trough period timeline. Mostly used for charts
 type Timeline struct {
 	Time              string   `json:"time" bson:"time"`
 	FormattedTime     string   `json:"formattedTime" bson:"formatted_time"`
@@ -209,6 +229,7 @@ type geo struct {
 	GeoMapData []*GeoMap `json:"geoMapData" bson:"geomap_data"`
 }
 
+// GeoMap - it's representation of interest by location. Mostly used for maps
 type GeoMap struct {
 	GeoCode        string   `json:"geoCode" bson:"geo_code"`
 	GeoName        string   `json:"geoName" bson:"geo_name"`
@@ -230,6 +251,7 @@ type rankedList struct {
 	Keywords []*RankedKeyword `json:"rankedKeyword" bson:"keywords"`
 }
 
+// RankedKeyword - it's representation of related to search items
 type RankedKeyword struct {
 	Query          string       `json:"query,omitempty" bson:"query"`
 	Topic          KeywordTopic `json:"topic,omitempty" bson:"topic"`
@@ -239,6 +261,7 @@ type RankedKeyword struct {
 	Link           string       `json:"link" bson:"link"`
 }
 
+// KeywordTopic - is a part of RankedKeyword
 type KeywordTopic struct {
 	Mid   string `json:"mid" bson:"mid"`
 	Title string `json:"title" bson:"title"`

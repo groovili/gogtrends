@@ -85,7 +85,7 @@ func main() {
 
 	log.Info("Compare keywords:")
 	// compare few keywords popularity
-	comapre, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
+	compare, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
 		ComparisonItems: []*gogtrends.ComparisonItem{
 			{
 				Keyword: "Go",
@@ -107,7 +107,7 @@ func main() {
 		Property: "",
 	}, langEn)
 	handleError(err, "Failed to explore compare widgets")
-	printItems(comapre)
+	printItems(compare)
 }
 
 func handleError(err error, errMsg string) {
