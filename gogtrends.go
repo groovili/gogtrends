@@ -163,7 +163,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 
 // InterestOverTime as list of `Timeline` dots for chart.
 func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Timeline, error) {
-	if w.ID != intOverTimeWidgetID {
+	if !strings.HasPrefix(w.ID, intOverTimeWidgetID) {
 		return nil, ErrInvalidWidgetType
 	}
 
@@ -207,7 +207,7 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 
 // InterestByLocation as list of `GeoMap`, with geo codes and interest values.
 func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*GeoMap, error) {
-	if w.ID != intOverRegionID {
+	if !strings.HasPrefix(w.ID, intOverRegionID) {
 		return nil, ErrInvalidWidgetType
 	}
 
@@ -249,7 +249,7 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 
 // Related topics or queries, list of `RankedKeyword`, supports two types of widgets.
 func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword, error) {
-	if w.ID != relatedQueriesID && w.ID != relatedTopicsID {
+	if !strings.HasPrefix(w.ID, relatedQueriesID) && !strings.HasPrefix(w.ID, relatedTopicsID) {
 		return nil, ErrInvalidWidgetType
 	}
 
