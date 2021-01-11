@@ -7,7 +7,7 @@ require (
 	github.com/pkg/errors v0.8.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.2.2
-	golang.org/x/sys/unix v0.0.0-20210110051926-789bb1bd4061
+	golang.org/x/sys v0.0.0-20191026070338-33540a1f6037 // indirect
 )
 
 go 1.14
