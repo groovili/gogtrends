@@ -417,32 +417,48 @@ func TestMultipleComparisonItems(t *testing.T) {
 				Geo:     locUS,
 				Time:    "today 12-m",
 			},
+			{
+				Keyword: "Java",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
 		},
 		Category: catProgramming,
 		Property: "",
 	}
 
-	explore, err := Explore(context.Background(), req, langEN)
+	ctx := context.Background()
+
+	explore, err := Explore(ctx, req, langEN)
 	assert.NoError(t, err)
 
-	// Interest overtime for first keyword
-	overTime, err := InterestOverTime(context.Background(), explore[0], langEN)
-	assert.NoError(t, err)
-	assert.True(t, len(overTime) > 0)
-
-	// Interest by location for first keyword
-	byLoc, err := InterestByLocation(context.Background(), explore[1], langEN)
-	assert.NoError(t, err)
-	assert.True(t, len(byLoc) > 0)
-
-	// Interest overtime for second keyword
-	overTime, err = InterestOverTime(context.Background(), explore[3], langEN)
+	// Interest overtime is always for displayed for all keywords
+	overTime, err := InterestOverTime(ctx, explore[0], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(overTime) > 0)
 
-	// Interest by location for second keyword
-	byLoc, err = InterestByLocation(context.Background(), explore[4], langEN)
+	// Interest by location for all items
+	byLoc, err := InterestByLocation(ctx, explore[1], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(byLoc) > 0)
+	byLoc, err = InterestByLocation(ctx, explore[3], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(byLoc) > 0)
+	byLoc, err = InterestByLocation(ctx, explore[6], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(byLoc) > 0)
+	byLoc, err = InterestByLocation(ctx, explore[9], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(byLoc) > 0)
 
+	// Related searches for all items
+	rel, err := Related(ctx, explore[4], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(rel) > 0)
+	rel, err = Related(ctx, explore[7], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(rel) > 0)
+	rel, err = Related(ctx, explore[10], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(rel) > 0)
 }

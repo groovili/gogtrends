@@ -10,8 +10,9 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
+	"log"
+
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -102,7 +103,7 @@ func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
 	}
 
 	if client.debug {
-		log.Info("[Debug] Request with params: ", r.URL)
+		log.Println("[Debug] Request with params: ", r.URL)
 	}
 
 	resp, err := c.c.Do(r)
@@ -112,7 +113,7 @@ func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if client.debug {
-		log.Info("[Debug] Response: ", resp)
+		log.Println("[Debug] Response: ", resp)
 	}
 
 	if resp.StatusCode == http.StatusTooManyRequests {
