@@ -403,3 +403,46 @@ func TestCompareInterestConcurrent(t *testing.T) {
 		}()
 	}
 }
+
+func TestMultipleComparisonItems(t *testing.T) {
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Python",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+
+	explore, err := Explore(context.Background(), req, langEN)
+	assert.NoError(t, err)
+
+	// Interest overtime for first keyword
+	overTime, err := InterestOverTime(context.Background(), explore[0], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(overTime) > 0)
+
+	// Interest by location for first keyword
+	byLoc, err := InterestByLocation(context.Background(), explore[1], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(byLoc) > 0)
+
+	// Interest overtime for second keyword
+	overTime, err = InterestOverTime(context.Background(), explore[3], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(overTime) > 0)
+
+	// Interest by location for second keyword
+	byLoc, err = InterestByLocation(context.Background(), explore[4], langEN)
+	assert.NoError(t, err)
+	assert.True(t, len(byLoc) > 0)
+
+}
