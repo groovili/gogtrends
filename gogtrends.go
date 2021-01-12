@@ -124,7 +124,7 @@ func ExploreLocations(ctx context.Context) (*ExploreLocTree, error) {
 // Explore list of widgets with tokens. Every widget
 // is related to specific method (`InterestOverTime`, `InterestOverLoc`, `RelatedSearches`, `Suggestions`)
 // and contains required token and request information.
-func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error) {
+func Explore(ctx context.Context, r *ExploreRequest, hl string) (ExploreResponse, error) {
 	// hook for using incorrect `time` request (backward compatibility)
 	for _, r := range r.ComparisonItems {
 		r.Time = strings.ReplaceAll(r.Time, "+", " ")
@@ -163,7 +163,7 @@ func Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidge
 
 // InterestOverTime as list of `Timeline` dots for chart.
 func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Timeline, error) {
-	if !strings.HasPrefix(w.ID, intOverTimeWidgetID) {
+	if !strings.HasPrefix(w.ID, string(IntOverTimeWidgetID)) {
 		return nil, ErrInvalidWidgetType
 	}
 
@@ -207,7 +207,7 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 
 // InterestByLocation as list of `GeoMap`, with geo codes and interest values.
 func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*GeoMap, error) {
-	if !strings.HasPrefix(w.ID, intOverRegionID) {
+	if !strings.HasPrefix(w.ID, string(IntOverRegionID)) {
 		return nil, ErrInvalidWidgetType
 	}
 
@@ -249,7 +249,7 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 
 // Related topics or queries, list of `RankedKeyword`, supports two types of widgets.
 func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword, error) {
-	if !strings.HasPrefix(w.ID, relatedQueriesID) && !strings.HasPrefix(w.ID, relatedTopicsID) {
+	if !strings.HasPrefix(w.ID, string(RelatedQueriesID)) && !strings.HasPrefix(w.ID, string(RelatedTopicsID)) {
 		return nil, ErrInvalidWidgetType
 	}
 
