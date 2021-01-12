@@ -2,6 +2,8 @@ package gogtrends
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	"sync"
 	"testing"
 
@@ -461,4 +463,126 @@ func TestMultipleComparisonItems(t *testing.T) {
 	rel, err = Related(ctx, explore[10], langEN)
 	assert.NoError(t, err)
 	assert.True(t, len(rel) > 0)
+}
+
+func TestExploreSort(t *testing.T) {
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Python",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Java",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+
+	explore, err := Explore(context.Background(), req, langEN)
+	assert.NoError(t, err)
+
+	explore.Sort()
+
+	assert.True(t, len(explore) > 0)
+
+	i := 0
+	for _, v := range explore {
+		numInd := strings.LastIndex(v.ID, "_")
+		val, err := strconv.ParseInt(v.ID[numInd+1:], 10, 32)
+		if err != nil {
+			continue
+		}
+
+		if int(val) < i {
+			t.Error("sort order is incorrect")
+		}
+
+		if int(val) > i {
+			i++
+		}
+	}
+}
+
+func TestExploreGetWidgetsByOrder(t *testing.T) {
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Python",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Java",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+
+	explore, err := Explore(context.Background(), req, langEN)
+	assert.NoError(t, err)
+
+	order := 0
+	golangWidgets := explore.GetWidgetsByOrder(order)
+	assert.True(t, len(golangWidgets) == 3)
+	for _, v := range golangWidgets {
+		numInd := strings.LastIndex(v.ID, "_")
+		val, err := strconv.ParseInt(v.ID[numInd+1:], 10, 32)
+		if err != nil {
+			t.Error("failed to get item order")
+			return
+		}
+
+		assert.Equal(t, order, int(val))
+	}
+}
+
+func TestExploreGetWidgetsByType(t *testing.T) {
+	req := &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword: "Golang",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Python",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+			{
+				Keyword: "Java",
+				Geo:     locUS,
+				Time:    "today 12-m",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}
+
+	explore, err := Explore(context.Background(), req, langEN)
+	assert.NoError(t, err)
+
+	rel := explore.GetWidgetsByType(RelatedQueriesID)
+	assert.True(t, len(rel) == 3)
+	for _, v := range rel {
+		assert.True(t, strings.Contains(v.ID, string(RelatedQueriesID)))
+	}
 }

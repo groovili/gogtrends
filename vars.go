@@ -1,5 +1,11 @@
 package gogtrends
 
+import (
+	"sort"
+	"strconv"
+	"strings"
+)
+
 const (
 	gAPI = "https://trends.google.com/trends/api"
 
@@ -20,12 +26,16 @@ const (
 	paramTZ    = "tz"
 	paramToken = "token"
 
-	intOverTimeWidgetID = "TIMESERIES"
-	intOverRegionID     = "GEO_MAP"
-	relatedQueriesID    = "RELATED_QUERIES"
-	relatedTopicsID     = "RELATED_TOPICS"
-
 	compareDataMode = "PERCENTAGES"
+)
+
+type WidgetType string
+
+const (
+	IntOverTimeWidgetID WidgetType = "TIMESERIES"
+	IntOverRegionID     WidgetType = "GEO_MAP"
+	RelatedQueriesID    WidgetType = "RELATED_QUERIES"
+	RelatedTopicsID     WidgetType = "RELATED_TOPICS"
 )
 
 var (
@@ -158,6 +168,76 @@ type ExploreWidget struct {
 	Title   string          `json:"title" bson:"title"`
 	ID      string          `json:"id" bson:"id"`
 	Request *WidgetResponse `json:"request" bson:"request"`
+}
+
+type ExploreResponse []*ExploreWidget
+
+func (e ExploreResponse) Sort() {
+	sort.Sort(e)
+}
+
+func (e ExploreResponse) Len() int {
+	return len(e)
+}
+
+func (e ExploreResponse) Less(i, j int) bool {
+	numI := strings.LastIndex(e[i].ID, "_")
+	if numI < 0 {
+		return true
+	}
+
+	numJ := strings.LastIndex(e[j].ID, "_")
+	if numJ < 0 {
+		return false
+	}
+
+	valI, err := strconv.ParseInt(e[i].ID[numI+1:], 10, 32)
+	if err != nil {
+		return true
+	}
+
+	valJ, err := strconv.ParseInt(e[j].ID[numJ+1:], 10, 32)
+	if err != nil {
+		return false
+	}
+
+	return valI < valJ
+}
+
+func (e ExploreResponse) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
+}
+
+func (e ExploreResponse) GetWidgetsByOrder(i int) ExploreResponse {
+	out := make(ExploreResponse, 0)
+	for _, v := range e {
+		if v.ID == string(IntOverTimeWidgetID) || v.ID == string(IntOverRegionID) {
+			continue
+		}
+
+		ind := strings.LastIndex(v.ID, "_")
+		val, err := strconv.ParseInt(v.ID[ind+1:], 10, 32)
+		if err != nil {
+			return out
+		}
+
+		if int(val) == i {
+			out = append(out, v)
+		}
+	}
+
+	return out
+}
+
+func (e ExploreResponse) GetWidgetsByType(t WidgetType) ExploreResponse {
+	out := make(ExploreResponse, 0)
+	for _, v := range e {
+		if strings.Contains(v.ID, string(t)) {
+			out = append(out, v)
+		}
+	}
+
+	return out
 }
 
 // WidgetResponse - system info for every available trends search mode
