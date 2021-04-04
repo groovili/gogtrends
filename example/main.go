@@ -48,12 +48,24 @@ func main() {
 	}
 	sg.Wait()
 
+	log.Println("Explore Search:")
+	keyword := "Go"
+
+	keywords, err := gogtrends.Search(ctx, keyword, langEn)
+	for _, v := range keywords {
+		log.Println(v)
+		if v.Type == "Language" {
+			keyword = v.Mid
+			break
+		}
+	}
+
 	log.Println("Explore trends:")
 	// get widgets for Golang keyword in programming category
 	explore, err := gogtrends.Explore(ctx, &gogtrends.ExploreRequest{
 		ComparisonItems: []*gogtrends.ComparisonItem{
 			{
-				Keyword: "Go",
+				Keyword: keyword,
 				Geo:     locUS,
 				Time:    "today 12-m",
 			},
