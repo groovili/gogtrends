@@ -1,4 +1,4 @@
-module github.com/universe-venture/gogtrends
+module github.com/groovili/gogtrends
 
 go 1.16
 
