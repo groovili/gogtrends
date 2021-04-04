@@ -2,6 +2,7 @@ package gogtrends
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -290,6 +291,39 @@ func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword
 	keywords := make([]*RankedKeyword, 0)
 	for _, v := range out.Default.Ranked {
 		keywords = append(keywords, v.Keywords...)
+	}
+
+	return keywords, nil
+}
+
+// Related topics or queries, list of `RankedKeyword`, supports two types of widgets.
+func Search(ctx context.Context, word, hl string) ([]*KeywordTopic, error) {
+	req := fmt.Sprintf("%s%s/%s", gAPI, gSAutocomplete, url.QueryEscape(word))
+	u, _ := url.Parse(req)
+
+	p := make(url.Values)
+	p.Set(paramTZ, "0")
+	p.Set(paramHl, hl)
+
+	u.RawQuery = p.Encode()
+
+	b, err := client.do(ctx, u)
+	if err != nil {
+		return nil, err
+	}
+
+	// google api returns not valid json :(
+	str := strings.Replace(string(b), ")]}',", "", 1)
+
+	out := new(searchOut)
+	if err := client.unmarshal(str, out); err != nil {
+		return nil, err
+	}
+
+	// split all keywords together
+	keywords := make([]*KeywordTopic, 0)
+	for _, v := range out.Default.Keywords {
+		keywords = append(keywords, v)
 	}
 
 	return keywords, nil
