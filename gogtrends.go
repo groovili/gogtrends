@@ -322,9 +322,7 @@ func Search(ctx context.Context, word, hl string) ([]*KeywordTopic, error) {
 
 	// split all keywords together
 	keywords := make([]*KeywordTopic, 0)
-	for _, v := range out.Default.Keywords {
-		keywords = append(keywords, v)
-	}
+	keywords = append(keywords, out.Default.Keywords...)
 
 	return keywords, nil
 }
