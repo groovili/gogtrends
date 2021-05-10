@@ -2,6 +2,7 @@ package gogtrends
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -585,4 +586,20 @@ func TestExploreGetWidgetsByType(t *testing.T) {
 	for _, v := range rel {
 		assert.True(t, strings.Contains(v.ID, string(RelatedQueriesID)))
 	}
+}
+
+func TestAutocomplete(t *testing.T) {
+	explore, err := Search(context.Background(), "Golang", langEN)
+	assert.NoError(t, err)
+
+	for _, v := range explore {
+		fmt.Println(v.Title, v.Type)
+		if v.Type == "Programming language" {
+			// result: /m/09gbxjr | Go | Programming language
+			assert.True(t, strings.Contains(v.Mid, "/m/09gbxjr"))
+			return
+		}
+	}
+
+	t.Error("failed to find topic")
 }

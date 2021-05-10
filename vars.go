@@ -12,12 +12,13 @@ const (
 	gDaily    = "/dailytrends"
 	gRealtime = "/realtimetrends"
 
-	gSExplore     = "/explore"
-	gSCategories  = "/explore/pickers/category"
-	gSGeo         = "/explore/pickers/geo"
-	gSRelated     = "/widgetdata/relatedsearches"
-	gSIntOverTime = "/widgetdata/multiline"
-	gSIntOverReg  = "/widgetdata/comparedgeo"
+	gSExplore      = "/explore"
+	gSCategories   = "/explore/pickers/category"
+	gSGeo          = "/explore/pickers/geo"
+	gSRelated      = "/widgetdata/relatedsearches"
+	gSIntOverTime  = "/widgetdata/multiline"
+	gSIntOverReg   = "/widgetdata/comparedgeo"
+	gSAutocomplete = "/autocomplete"
 
 	paramHl    = "hl"
 	paramCat   = "cat"
@@ -329,6 +330,14 @@ type relatedList struct {
 
 type rankedList struct {
 	Keywords []*RankedKeyword `json:"rankedKeyword" bson:"keywords"`
+}
+
+type searchOut struct {
+	Default searchList `json:"default" bson:"default"`
+}
+
+type searchList struct {
+	Keywords []*KeywordTopic `json:"topics" bson:"keywords"`
 }
 
 // RankedKeyword - it's representation of related to search items

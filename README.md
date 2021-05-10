@@ -40,6 +40,8 @@ Please notice, when you call **Explore** method for keywords comparison, two fir
 
 * `Realtime(ctx context.Context, hl, loc, cat string) ([]*TrendingStory, error)` - represents realtime trends with included articles and sources.
 
+* `Search(ctx context.Context, word, hl string) ([]*KeywordTopic, error)` - Words/Topics related (5 results max) with your search.
+
 * `Explore(ctx context.Context, r *ExploreRequest, hl string) ([]*ExploreWidget, error)` - widgets with **tokens**. Every widget is related to specific method (`InterestOverTime`, `InterestByLocation`, `Related`) and contains required **token** and request information.
 
 * `InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Timeline, error)` - interest over time, dots for chart. 
