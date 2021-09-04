@@ -138,9 +138,12 @@ type ExploreRequest struct {
 // ComparisonItem it's concrete search keyword
 // with Geo (can be found with ExploreLocations method) locality and Time period
 type ComparisonItem struct {
-	Keyword string `json:"keyword" bson:"keyword"`
-	Geo     string `json:"geo,omitempty" bson:"geo"`
-	Time    string `json:"time" bson:"time"`
+	Keyword                string `json:"keyword" bson:"keyword"`
+	Geo                    string `json:"geo,omitempty" bson:"geo"`
+	Time                   string `json:"time" bson:"time"`
+	GranularTimeResolution bool   `json:"granularTimeResolution" bson:"granularTimeResolution"`
+	StartTime              string `json:"startTime" bson:"startTime"`
+	EndTime                string `json:"endTime" bson:"endTime"`
 }
 
 // ExploreCatTree - available categories list tree
