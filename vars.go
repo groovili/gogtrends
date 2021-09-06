@@ -141,9 +141,9 @@ type ComparisonItem struct {
 	Keyword                string `json:"keyword" bson:"keyword"`
 	Geo                    string `json:"geo,omitempty" bson:"geo"`
 	Time                   string `json:"time" bson:"time"`
-	GranularTimeResolution bool   `json:"granularTimeResolution" bson:"granularTimeResolution"`
-	StartTime              string `json:"startTime" bson:"startTime"`
-	EndTime                string `json:"endTime" bson:"endTime"`
+	GranularTimeResolution bool   `json:"granularTimeResolution" bson:"granular_time_resolution"`
+	StartTime              string `json:"startTime" bson:"start_time"`
+	EndTime                string `json:"endTime" bson:"end_time"`
 }
 
 // ExploreCatTree - available categories list tree
