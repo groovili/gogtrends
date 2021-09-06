@@ -603,3 +603,25 @@ func TestAutocomplete(t *testing.T) {
 
 	t.Error("failed to find topic")
 }
+
+func TestInterestOverTimeLast24Hours(t *testing.T) {
+	ctx := context.Background()
+	explore, err := Explore(ctx, &ExploreRequest{
+		ComparisonItems: []*ComparisonItem{
+			{
+				Keyword:                "Golang",
+				Time:                   "2021-09-05T09\\:16\\:00 2021-09-06T09\\:16\\:00",
+				GranularTimeResolution: true,
+				StartTime:              "2021-09-05T09:16:00.000Z",
+				EndTime:                "2021-09-06T09:16:00.000Z",
+			},
+		},
+		Category: catProgramming,
+		Property: "",
+	}, "EN")
+	assert.NoError(t, err)
+
+	overTime, err := InterestOverTime(ctx, explore[0], "EN")
+	assert.NoError(t, err)
+	assert.True(t, len(overTime) > 0)
+}
