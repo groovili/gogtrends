@@ -604,7 +604,7 @@ func TestAutocomplete(t *testing.T) {
 	t.Error("failed to find topic")
 }
 
-func TestInterestOverTimeLast24Hours(t *testing.T) {
+func TestComparisonItemWithStartAndEndTime(t *testing.T) {
 	ctx := context.Background()
 	explore, err := Explore(ctx, &ExploreRequest{
 		ComparisonItems: []*ComparisonItem{
