@@ -258,6 +258,7 @@ type WidgetResponse struct {
 	Language           string                  `json:"language" bson:"language"`
 	TrendinessSettings map[string]string       `json:"trendinessSettings" bson:"trendiness_settings"`
 	DataMode           string                  `json:"dataMode,omitempty" bson:"data_mode"`
+	UserConfig         map[string]string       `json:"userConfig,omitempty" bson:"user_config"`
 	UserCountryCode    string                  `json:"userCountryCode,omitempty" bson:"user_country_code"`
 }
 
