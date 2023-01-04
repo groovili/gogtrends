@@ -2,6 +2,7 @@ package gogtrends
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -182,12 +183,12 @@ func InterestOverTime(ctx context.Context, w *ExploreWidget, hl string) ([]*Time
 	}
 
 	// marshal request for query param
-	mReq, err := jsoniter.MarshalToString(w.Request)
+	mReq, err := json.Marshal(w.Request)
 	if err != nil {
 		return nil, errors.Wrapf(err, errInvalidRequest)
 	}
 
-	p.Set(paramReq, mReq)
+	p.Set(paramReq, string(mReq))
 	u.RawQuery = p.Encode()
 
 	b, err := client.do(ctx, u)
@@ -224,12 +225,12 @@ func InterestByLocation(ctx context.Context, w *ExploreWidget, hl string) ([]*Ge
 	}
 
 	// marshal request for query param
-	mReq, err := jsoniter.MarshalToString(w.Request)
+	mReq, err := json.Marshal(w.Request)
 	if err != nil {
 		return nil, errors.Wrapf(err, errInvalidRequest)
 	}
 
-	p.Set(paramReq, mReq)
+	p.Set(paramReq, string(mReq))
 	u.RawQuery = p.Encode()
 
 	b, err := client.do(ctx, u)
@@ -266,12 +267,12 @@ func Related(ctx context.Context, w *ExploreWidget, hl string) ([]*RankedKeyword
 	}
 
 	// marshal request for query param
-	mReq, err := jsoniter.MarshalToString(w.Request)
+	mReq, err := json.Marshal(w.Request)
 	if err != nil {
 		return nil, errors.Wrapf(err, errInvalidRequest)
 	}
 
-	p.Set(paramReq, mReq)
+	p.Set(paramReq, string(mReq))
 	u.RawQuery = p.Encode()
 
 	b, err := client.do(ctx, u)
