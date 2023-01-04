@@ -98,9 +98,16 @@ func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
 
 	r.Header.Add(headerKeyAccept, contentTypeJSON)
 
-	if len(client.cookie) != 0 {
-		r.Header.Add(headerKeyCookie, client.cookie)
+	geo := u.Query().Get(paramGeo)
+	if len(geo) == 0 {
+		geo = "US"
 	}
+	if len(client.cookie) == 0 {
+		if err = c.getCookie(ctx, geo); err != nil {
+			log.Println("[Debug] Get Cookie failed: ", err.Error())
+		}
+	}
+	r.Header.Add(headerKeyCookie, client.cookie)
 
 	if client.debug {
 		log.Println("[Debug] Request with params: ", r.URL)
@@ -117,17 +124,16 @@ func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
 	}
 
 	if resp.StatusCode == http.StatusTooManyRequests {
-		cookie := strings.Split(resp.Header.Get(headerKeySetCookie), ";")
-		if len(cookie) > 0 {
-			client.cookie = cookie[0]
-			r.Header.Set(headerKeyCookie, cookie[0])
-
-			resp, err = c.c.Do(r)
-			if err != nil {
-				return nil, err
-			}
-			defer resp.Body.Close()
+		if err = c.getCookie(ctx, geo); err != nil {
+			log.Println("[Debug] Get Cookie failed: ", err.Error())
+			return nil, errors.Wrap(err, errReqDataF)
 		}
+		r.Header.Set(headerKeyCookie, client.cookie)
+		resp, err = c.c.Do(r)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -135,6 +141,32 @@ func (c *gClient) do(ctx context.Context, u *url.URL) ([]byte, error) {
 	}
 
 	return ioutil.ReadAll(resp.Body)
+}
+
+func (c *gClient) getCookie(ctx context.Context, geo string) (err error) {
+	u, _ := url.Parse(gCookieAPI)
+
+	p := make(url.Values)
+	p.Set(paramGeo, geo)
+
+	u.RawQuery = p.Encode()
+	r, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return errors.Wrap(err, errCreateRequest)
+	}
+
+	resp, err := c.c.Do(r)
+	if err != nil {
+		return errors.Wrap(err, errDoRequest)
+	}
+	defer resp.Body.Close()
+
+	for _, v := range strings.Split(resp.Header.Get(headerKeySetCookie), ";") {
+		if strings.HasPrefix(v, "NID=") {
+			client.cookie = v
+		}
+	}
+	return
 }
 
 func (c *gClient) unmarshal(str string, dest interface{}) error {
